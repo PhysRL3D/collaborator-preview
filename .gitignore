@@ -1,0 +1,4 @@
+.DS_Store
+*.original
+.film-work/
+RELEASE_*.txt
