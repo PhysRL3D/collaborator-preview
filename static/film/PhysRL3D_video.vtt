@@ -1,0 +1,74 @@
+WEBVTT
+
+00:00.500 --> 00:07.849
+PhysRL3D: Reinforcement Post-Training of Image-to-3D Generators with Physical Rewards for Real-World Fabrication.
+
+00:09.300 --> 00:11.794
+A generated object should do more than look right.
+
+00:11.794 --> 00:18.055
+For real-world fabrication, it should stand, use material efficiently, and preserve the intended geometry.
+
+00:19.350 --> 00:27.659
+PhysRL3D uses DiffusionNFT to post-train the generator with simulator-free rewards, encouraging standability in the generated pose.
+
+00:31.300 --> 00:34.118
+A centre-of-mass margin rewards static balance.
+
+00:34.118 --> 00:39.218
+No simulator is queried during post-training; these simulations evaluate the outputs.
+
+00:39.566 --> 00:41.848
+Here are the final states at ten seconds.
+
+00:43.350 --> 00:45.331
+Next, remove the blue supports.
+
+00:45.331 --> 00:50.375
+Compare the total material and the percentage used for supports, estimated by the slicer.
+
+00:55.350 --> 00:56.717
+Now, beyond the screen.
+
+00:56.717 --> 00:59.172
+View the real prints from multiple angles,
+
+01:05.350 --> 01:08.614
+then watch what happens when they are released after support removal.
+
+01:15.450 --> 01:23.078
+Our real-print examples show that PhysRL3D can improve standability while reducing support-material use and retaining the intended geometry.
+
+01:23.078 --> 01:26.080
+This means less material spent on disposable supports.
+
+01:26.080 --> 01:28.402
+See the paper for detailed comparisons.
+
+01:31.350 --> 01:32.717
+How do we achieve this?
+
+01:32.717 --> 01:39.737
+PhysRL3D post-trains the generator with rewards for standability, material efficiency, and geometric fidelity.
+
+01:39.737 --> 01:45.641
+The coarse occupancy grid lets us compute the physical rewards without simulator or slicer queries during training.
+
+01:47.350 --> 01:50.324
+These objectives can conflict, so their balance matters.
+
+01:50.800 --> 01:57.066
+Our Standability-Aware Multi-Reward Scheduling, or SAS, initially prioritises standability.
+
+01:58.550 --> 02:03.801
+As standability improves, SAS gives more weight to fidelity and material efficiency.
+
+02:09.050 --> 02:13.910
+Their relative shares adapt to progress, rather than following a fixed weighting throughout training.
+
+02:19.350 --> 02:25.817
+The result is more standable outputs and lower average slicer-estimated material use, with no added inference cost.
+
+02:27.450 --> 02:35.173
+This is PhysRL3D. Reinforcement Post-Training of Image-to-3D Generators
+with Physical Rewards for Real-World Fabrication.

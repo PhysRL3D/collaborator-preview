@@ -1,0 +1,13 @@
+{
+  "file": "PhysRL3D_video.mp4",
+  "durationSeconds": 155.633333,
+  "resolution": [1920, 1080],
+  "videoCodec": "h264",
+  "audioCodec": "aac",
+  "sha256": "56182bd6b9930e64fbafc7440f58cd6e066b7d52ffc2056ef046132ce6da39f0",
+  "captions": "PhysRL3D_video.vtt",
+  "captionSource": "Extracted from the supplied video's embedded English subtitle track without text or timing changes.",
+  "poster": "PhysRL3D_video-poster.jpg",
+  "posterTimeSeconds": 2,
+  "note": "User-supplied replacement video, copied without transcoding. The previous 50-second film and its edit manifest are retained as legacy assets and are no longer the primary film."
+}

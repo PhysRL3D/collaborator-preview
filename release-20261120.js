@@ -2,9 +2,9 @@
 (() => {
   const hero=document.getElementById('support-examples');
   hero.insertAdjacentHTML('afterend', `<section id="film" class="release-section film-section" aria-labelledby="film-title">
-    <div class="release-heading"><div><p class="eyebrow">THE FILM · 50 SECONDS</p><h2 id="film-title">Beyond visual<br><span>appearance.</span></h2></div><p>One image. Physical objectives.<br>A short look at the method—and the evidence.</p></div>
-    <video controls playsinline preload="none" poster="static/film/poster.png" aria-label="PhysRL3D 50-second research film"><source src="static/film/physrl3d-50s.mp4" type="video/mp4"><track kind="captions" src="static/film/captions.vtt" srclang="en" label="English" default></video>
-    <div class="film-meta"><p>Silent, with on-screen text. Real prints, illustrative support removal and benchmark averages are identified separately.</p><a href="film/">Open film</a><a href="static/film/physrl3d-50s.mp4" download>Download 1080p</a></div>
+    <div class="release-heading"><div><p class="eyebrow">THE FILM · 2 MIN 36 SEC</p><h2 id="film-title">Beyond visual<br><span>appearance.</span></h2></div><p>One image. Physical objectives.<br>A look at the method—and the evidence.</p></div>
+    <video controls playsinline preload="none" poster="static/film/PhysRL3D_video-poster.jpg" aria-label="PhysRL3D research video, 2 minutes 36 seconds"><source src="static/film/PhysRL3D_video.mp4" type="video/mp4"><track kind="captions" src="static/film/PhysRL3D_video.vtt" srclang="en" label="English" default></video>
+    <div class="film-meta"><p>Latest project video, with audio and English captions. Support-removal animation is illustrative; physical prints and simulation are separate evidence.</p><a href="film/">Open film</a><a href="static/film/PhysRL3D_video.mp4" download>Download 1080p</a></div>
   </section>`);
   document.getElementById('method').insertAdjacentHTML('afterend', `<section id="sas-film" class="release-section film-section" aria-labelledby="sas-film-title">
     <div class="release-heading"><div><p class="eyebrow">SAS IN MOTION · 32 SECONDS</p><h2 id="sas-film-title">Standability first.<br><span>Balance as it improves.</span></h2></div><p>Three reward aspects. One adaptive schedule.<br>Follow the gate and the changing weight shares.</p></div>
