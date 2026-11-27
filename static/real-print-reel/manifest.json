@@ -1,0 +1,223 @@
+{
+  "source": "static/film/PhysRL3D_video.mp4",
+  "sourceSHA256": "56182bd6b9930e64fbafc7440f58cd6e066b7d52ffc2056ef046132ce6da39f0",
+  "note": "Panel crops of the supplied latest film, not new experiments. Original film playback edits and held endings are preserved. No clip has been retimed here.",
+  "clips": [
+    {
+      "id": "bridge-turn",
+      "name": "Bridge",
+      "kind": "turns",
+      "start": 55,
+      "end": 65,
+      "crop": {
+        "x": 50,
+        "y": 180,
+        "width": 600,
+        "height": 390
+      },
+      "caption": "PhysRL3D-SAS · real-print views. Accelerated and camera-stabilised in the source film.",
+      "file": "static/real-print-reel/bridge-turn.mp4",
+      "poster": "static/real-print-reel/bridge-turn.jpg",
+      "duration": 10,
+      "sha256": "b31db0c53051ee38ba3c662bea8d88456b64ea62e93b25a5ece83965081c5bb9"
+    },
+    {
+      "id": "cat-turn",
+      "name": "Cat",
+      "kind": "turns",
+      "start": 55,
+      "end": 65,
+      "crop": {
+        "x": 660,
+        "y": 180,
+        "width": 600,
+        "height": 390
+      },
+      "caption": "PhysRL3D-SAS · real-print views. Accelerated and camera-stabilised in the source film.",
+      "file": "static/real-print-reel/cat-turn.mp4",
+      "poster": "static/real-print-reel/cat-turn.jpg",
+      "duration": 10,
+      "sha256": "ed5e1f90c179a9a25329f1e76faf063efb6634229382368f11e6fa42aab50bf6"
+    },
+    {
+      "id": "chair-turn",
+      "name": "Chair",
+      "kind": "turns",
+      "start": 55,
+      "end": 65,
+      "crop": {
+        "x": 1270,
+        "y": 180,
+        "width": 600,
+        "height": 390
+      },
+      "caption": "PhysRL3D-SAS · real-print views. Accelerated and camera-stabilised in the source film.",
+      "file": "static/real-print-reel/chair-turn.mp4",
+      "poster": "static/real-print-reel/chair-turn.jpg",
+      "duration": 10,
+      "sha256": "eaae164d6abadc2e947546efbc3933b6eb9b0167c7794f293f6328f041c12176"
+    },
+    {
+      "id": "koala-turn",
+      "name": "Koala",
+      "kind": "turns",
+      "start": 55,
+      "end": 65,
+      "crop": {
+        "x": 50,
+        "y": 588,
+        "width": 600,
+        "height": 390
+      },
+      "caption": "PhysRL3D-SAS · real-print views. Accelerated and camera-stabilised in the source film.",
+      "file": "static/real-print-reel/koala-turn.mp4",
+      "poster": "static/real-print-reel/koala-turn.jpg",
+      "duration": 10,
+      "sha256": "ca4ac24b207e8d8660e3c9f28d58d0d9a287d6a2c4fcb2eebd3163c1c9c3e8db"
+    },
+    {
+      "id": "kangaroo-turn",
+      "name": "Kangaroo",
+      "kind": "turns",
+      "start": 55,
+      "end": 65,
+      "crop": {
+        "x": 660,
+        "y": 588,
+        "width": 600,
+        "height": 390
+      },
+      "caption": "PhysRL3D-SAS · real-print views. Accelerated and camera-stabilised in the source film.",
+      "file": "static/real-print-reel/kangaroo-turn.mp4",
+      "poster": "static/real-print-reel/kangaroo-turn.jpg",
+      "duration": 10,
+      "sha256": "8bea422cba663f8309b4fadd662a36dc2defa89bde70a8c81a4ef0c6b7b84e32"
+    },
+    {
+      "id": "dog-turn",
+      "name": "Dog",
+      "kind": "turns",
+      "start": 55,
+      "end": 65,
+      "crop": {
+        "x": 1270,
+        "y": 588,
+        "width": 600,
+        "height": 390
+      },
+      "caption": "PhysRL3D-SAS · real-print views. Accelerated and camera-stabilised in the source film.",
+      "file": "static/real-print-reel/dog-turn.mp4",
+      "poster": "static/real-print-reel/dog-turn.jpg",
+      "duration": 10,
+      "sha256": "bd00dbfcb85234aa444fe551e6e37d4d8bd173e202ec43f8c9cfb2a3e107b87d"
+    },
+    {
+      "id": "kangaroo-release",
+      "name": "Kangaroo",
+      "kind": "release",
+      "start": 65,
+      "end": 75,
+      "crop": {
+        "x": 50,
+        "y": 194,
+        "width": 600,
+        "height": 406
+      },
+      "caption": "TRELLIS.2 left · PhysRL3D-SAS right. Physical release footage. Source film: 0.5× playback; final frames held.",
+      "file": "static/real-print-reel/kangaroo-release.mp4",
+      "poster": "static/real-print-reel/kangaroo-release.jpg",
+      "duration": 10,
+      "sha256": "c46f6f8c0a838aaa267bc6b958ea45b887bfd713cd908ec86345048a674e5f84"
+    },
+    {
+      "id": "christmas-tree-release",
+      "name": "Christmas tree",
+      "kind": "release",
+      "start": 65,
+      "end": 75,
+      "crop": {
+        "x": 660,
+        "y": 194,
+        "width": 600,
+        "height": 406
+      },
+      "caption": "TRELLIS.2 left · PhysRL3D-SAS right. Physical release footage. Source film: 0.5× playback; final frames held.",
+      "file": "static/real-print-reel/christmas-tree-release.mp4",
+      "poster": "static/real-print-reel/christmas-tree-release.jpg",
+      "duration": 10,
+      "sha256": "77a621437b494cf5bdcedf41a08ebbadfb963320115625d822b75949e08aa880"
+    },
+    {
+      "id": "penguin-release",
+      "name": "Penguin",
+      "kind": "release",
+      "start": 65,
+      "end": 75,
+      "crop": {
+        "x": 1270,
+        "y": 194,
+        "width": 600,
+        "height": 406
+      },
+      "caption": "TRELLIS.2 left · PhysRL3D-SAS right. Physical release footage. Source film: 0.5× playback; final frames held.",
+      "file": "static/real-print-reel/penguin-release.mp4",
+      "poster": "static/real-print-reel/penguin-release.jpg",
+      "duration": 10,
+      "sha256": "e7a4203666e3375f6f983daa3940fd31d5035ad4fea307e75c1fc238bc8813a8"
+    },
+    {
+      "id": "chair-views",
+      "name": "Chair",
+      "kind": "views",
+      "start": 65,
+      "end": 75,
+      "crop": {
+        "x": 50,
+        "y": 636,
+        "width": 600,
+        "height": 404
+      },
+      "caption": "TRELLIS.2 left · PhysRL3D-SAS right. Standing views, not a release test. Source film: 0.5× playback; final frames held.",
+      "file": "static/real-print-reel/chair-views.mp4",
+      "poster": "static/real-print-reel/chair-views.jpg",
+      "duration": 10,
+      "sha256": "b31e24213db23905c8db399f73b06bbe4c5e42fa813a4e40749754e80e14c391"
+    },
+    {
+      "id": "dog-views",
+      "name": "Dog",
+      "kind": "views",
+      "start": 65,
+      "end": 75,
+      "crop": {
+        "x": 660,
+        "y": 636,
+        "width": 600,
+        "height": 404
+      },
+      "caption": "TRELLIS.2 left · PhysRL3D-SAS right. Standing views, not a release test. Source film: 0.5× playback; final frames held.",
+      "file": "static/real-print-reel/dog-views.mp4",
+      "poster": "static/real-print-reel/dog-views.jpg",
+      "duration": 10,
+      "sha256": "59171cd34c7c0cb39f462089b65f8ef4f75d0b3f46913494f5e06cd49d67f371"
+    },
+    {
+      "id": "cat-views",
+      "name": "Cat",
+      "kind": "views",
+      "start": 65,
+      "end": 75,
+      "crop": {
+        "x": 1270,
+        "y": 636,
+        "width": 600,
+        "height": 404
+      },
+      "caption": "PhysRL3D-SAS left · TRELLIS.2 right. Standing views, not a release test. Source film: 0.5× playback; final frames held.",
+      "file": "static/real-print-reel/cat-views.mp4",
+      "poster": "static/real-print-reel/cat-views.jpg",
+      "duration": 10,
+      "sha256": "f49f2a07d0548a8f59445073ffdcaa041693342a7fc8903d535a4a4fe8dd2c12"
+    }
+  ]
+}

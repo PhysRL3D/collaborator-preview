@@ -33,7 +33,6 @@
   const primary=document.querySelector('.topbar .filled');primary.href='#film';primary.textContent='Watch the film';
   document.querySelectorAll('.brand').forEach(el=>{el.innerHTML='<img src="static/brand/physrl3d-lockup.svg?v=20261120loop1" alt="PhysRL3D: 3D, reinforcement learning and physical balance" width="174" height="42">';});
   const title=document.getElementById('support-title');title.innerHTML='<img class="hero-wordmark" src="static/brand/physrl3d-wordmark.svg" alt="PhysRL3D" width="420" height="116">';
-  document.querySelectorAll('#citation p').forEach(p=>{if(p.textContent==='Anonymous authors · Under review')p.textContent='PhysRL3D · Research project';});
   document.querySelectorAll('[data-showcase-action="standing"]').forEach(button=>{
     button.textContent='10 s standing replay';
     button.title='Precomputed MuJoCo replay from the original generated pose (after support removal where supports exist): uniform solid, flat ground, no push. Qualitative, not the paper benchmark.';
