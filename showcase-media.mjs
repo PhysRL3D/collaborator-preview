@@ -53,7 +53,7 @@ function installMedia(host) {
  const previous=document.createElement('button'),next=document.createElement('button'),toggle=document.createElement('button'),count=document.createElement('span');
  previous.type=next.type=toggle.type='button';previous.textContent='←';next.textContent='→';previous.setAttribute('aria-label','Previous media');next.setAttribute('aria-label','Next media');
  nav.append(previous,count,next,toggle);
- note.className='showcase-media-note';note.textContent='Physical photos and clips are qualitative case studies. They are not mass-bound to the current 60 mm display meshes. Measured weights remain in the print section below.';
+ note.className='showcase-media-note';note.textContent='Koala and kangaroo weights come from separate 100 mm real prints (1 g resolution), not the current 60 mm viewer meshes or their illustrative blue supports. Photos and clips are qualitative case studies.';
  body.replaceChildren(content,nav,note);
  function stopTimer(){if(timer!==null)clearTimeout(timer);timer=null;}
  function visible(){

@@ -6,6 +6,7 @@ import {SWEEP_START,SWEEP_END,WEIGH_TIME,RELEASE_TIME,massSummary,sweepPose,smoo
 import {STANDING_DURATION,validateStandingData,sampleStanding} from './standing-test.mjs?v=20261119standing1';
 import {buildSliceIndex,sliceHeight,intersectSlice} from './mesh-slice.mjs?v=20261119slice1';
 import {showcaseTimeline,playbackSpeed,nextExampleIndex,displayPositions,COMPARE_SECONDS,ORBIT_RADIANS_PER_SECOND} from './showcase-timeline.mjs?v=20261119merge1';
+import {measuredPrintWeight} from './measured-print-weights.mjs?v=20261127weights1';
 
 const ROOT='static/physics-20261118/';
 const STANDING_ROOT='static/standing-20261119/';
@@ -81,7 +82,7 @@ let reduced=motionPreference.matches;
    input.querySelector('img').alt=group?`${group.name}: conditioning image`:'Select an example to see its conditioning image';
    input.querySelector('h3').textContent=group?group.name:'Seven PhysRL3D examples';
    input.querySelector('[data-pair-number]').textContent=group?`${examples.findIndex(e=>e[0]===id)+1} / ${examples.length}`:'ALL SAS EXAMPLES';
-   input.querySelector('[data-pair-explanation]').textContent=!group?'Select an example to inspect its PhysRL3D output.':DISPLAY_ONLY.has(id)?'Verified print examples with an illustrative blue-support removal animation. Slicer grams and standing replay are not bound to this example.':oursOnly?'PhysRL3D · SAS output.':id==='penguin'?'SAS output only. Baseline is being rechecked.':'One input, two methods. Both display turntables rotate at the same rate; source replay poses are unchanged.';
+   input.querySelector('[data-pair-explanation]').textContent=!group?'Select an example to inspect its PhysRL3D output.':DISPLAY_ONLY.has(id)?'100 mm real-print weights · illustrative blue supports. Measurements are separate from this 60 mm display mesh.':oursOnly?'PhysRL3D · SAS output.':id==='penguin'?'SAS output only. Baseline is being rechecked.':'One input, two methods. Both display turntables rotate at the same rate; source replay poses are unchanged.';
    input.querySelector('.pair-input-image').hidden=!group;
    if(oursOnly)host.querySelector('[data-physics-overview]').setAttribute('aria-pressed',String(!id));
    else host.querySelector('[data-physics-overview]').removeAttribute('aria-pressed');
@@ -314,10 +315,11 @@ let reduced=motionPreference.matches;
      label.dataset.timestepSensitive='true';label.append(badge);
    }
    const weight=displayOnly?null:massSummary(weightData.models[key]);
-   const weightLabel=document.createElement('div');weightLabel.className='support-weight-label';weightLabel.innerHTML='<b>— g</b><span>Awaiting supports</span><small>Slicer estimate</small>';labels.append(weightLabel);
+   const measuredWeight=displayOnly?measuredPrintWeight(key):null;
+   const weightLabel=document.createElement('div');weightLabel.className='support-weight-label';weightLabel.dataset.massSource=measuredWeight?'physical-print':'slicer-estimate';weightLabel.dataset.modelKey=key;weightLabel.innerHTML='<b>— g</b><span>Awaiting supports</span><small></small>';weightLabel.querySelector('small').textContent=measuredWeight?'Measured · 100 mm print':'Slicer estimate';labels.append(weightLabel);
    const leader=document.createElement('div'),weightLeader=document.createElement('div');
    for(const line of [leader,weightLeader]){line.className='physics-label-leader';line.hidden=true;labels.prepend(line);}
-   const entry={key,g,method,offset,baseX:offset.position.x,body,chunks,motion,physics,label,meta,weight,weightLabel,leader,weightLeader,scale,sweeper,displayOnly,illustrativeSupports,
+   const entry={key,g,method,offset,baseX:offset.position.x,body,chunks,motion,physics,label,meta,weight,measuredWeight,weightLabel,leader,weightLeader,scale,sweeper,displayOnly,illustrativeSupports,
      tiltLabel:label.querySelector('[data-standing-tilt]'),stateLabel:label.querySelector('[data-standing-state]'),standingFrame:null};bodies.push(entry);
    applyBody(entry,0);return entry;
  }
@@ -367,15 +369,18 @@ let reduced=motionPreference.matches;
    entry.stateLabel.textContent=entry.illustrativeSupports?'Illustrative support removal · print photos verified':!standing?'Not simulated':!released?'10 s rigid-body replay':standing.state;
    entry.label.title=!standing?entry.physics.reason:!released?'Starts after support collection.':
      `${standing.elapsed.toFixed(2)} / ${STANDING_DURATION.toFixed(2)} s; current tilt ${standing.tiltDeg.toFixed(2)}°; maximum tilt so far ${standing.maxTiltDeg.toFixed(2)}°. Orientation threshold only, not certified standing.`;
-   const weighed=t>=WEIGH_TIME&&entry.weight;
+   // Real-print measurements are independent evidence, not the result of this
+   // animation. Never put them onto the unbound display mesh's virtual scale.
+   const measured=entry.measuredWeight,shownWeight=measured||entry.weight;
+   const weighed=Boolean(measured)||(t>=WEIGH_TIME&&entry.weight);
    entry.weightLabel.classList.toggle('is-weighed',Boolean(weighed));
-   entry.weightLabel.querySelector('b').textContent=weighed?`${entry.weight.support.toFixed(2)} g`:'— g';
-   entry.weightLabel.querySelector('span').textContent=weighed?`${entry.weight.percent.toFixed(1)}% of total`:t>=SWEEP_START?'Collecting supports':'Support weight';
-   entry.weightLabel.title=entry.weight?`Support / (body + support): ${entry.weight.support} / (${entry.weight.body} + ${entry.weight.support}) g. Slicer estimate, not a physical measurement.`:'Weight data unavailable';
+   entry.weightLabel.querySelector('b').textContent=weighed?`${shownWeight.support.toFixed(measured?0:2)} g support`:'— g';
+   entry.weightLabel.querySelector('span').textContent=weighed?`${shownWeight.percent.toFixed(measured?0:1)}% of total`:t>=SWEEP_START?'Collecting supports':'Support weight';
+   entry.weightLabel.title=measured?`${measured.body} g model + ${measured.support} g removed supports = ${measured.total} g total. 100 mm physical print; scale resolution 1 g. Separate from the 60 mm display mesh and illustrative blue supports.`:entry.weight?`Support / (body + support): ${entry.weight.support} / (${entry.weight.body} + ${entry.weight.support}) g. Slicer estimate, not a physical measurement.`:'Weight data unavailable';
  }
  function updateUI(){
    const state=showcaseState||showcaseTimeline(showcaseTime,{action,hasReplay:false}),seconds=state.replayTime;
-   const names={inspect:'Interactive geometry · not a simulation',supports:time<.9?'Supports attached':time<SWEEP_START?'Supports break apart':'Collecting sliced supports',weight:'Slicer-estimated support weight & share',slice:'Top-to-bottom display-mesh cutaway',standing:'Validated precomputed standing replay',unavailable:'Standing replay unavailable · not simulated','supports-unavailable':'Support animation unavailable'};
+   const names={inspect:'Interactive geometry · not a simulation',supports:time<.9?'Supports attached':time<SWEEP_START?'Supports break apart':DISPLAY_ONLY.has(selected)?'Illustrative support removal':'Collecting sliced supports',weight:DISPLAY_ONLY.has(selected)?'100 mm real-print weight & support share':selected?'Slicer-estimated support weight & share':'Support weights · sources labelled below',slice:'Top-to-bottom display-mesh cutaway',standing:'Validated precomputed standing replay',unavailable:'Standing replay unavailable · not simulated','supports-unavailable':'Support animation unavailable'};
    phase.textContent=ready?(selected&&!selectedBodies().length?'This model could not load · no substitute is shown':names[state.phase]):'Loading 3D examples';
    const timed=state.phase==='standing'||state.phase==='slice';
    clock.textContent=state.phase==='standing'?`${seconds.toFixed(1)} / 10.0 s`:state.phase==='slice'?`${state.localTime.toFixed(1)} / 9.0 s`:'—';
@@ -416,8 +421,18 @@ let reduced=motionPreference.matches;
  }
  function updateMassDetail(){
    const detail=host.querySelector('.support-mass-detail');host.dataset.detailState=`${selected}-${time>=WEIGH_TIME}`;
-   if(!selected){detail.textContent='Select an example for its slicer-estimated support grams and percentage. Koala and kangaroo do not have bound support or mass data.';return;}
-   if(DISPLAY_ONLY.has(selected)){detail.textContent='No sliced support or material data is bound to this original display mesh. No weight is inferred.';return;}
+   if(!selected){detail.textContent='Select an example for its weight breakdown. Koala and kangaroo show 100 mm real-print measurements; other examples show slicer estimates.';return;}
+   if(DISPLAY_ONLY.has(selected)){
+     detail.replaceChildren();
+     for(const e of bodies.filter(e=>e.g.id===selected)){
+       const card=document.createElement('div');card.className='support-mass-card';card.dataset.massSource='physical-print';
+       const measured=e.measuredWeight;
+       if(measured){card.innerHTML=`<span>${e.method==='sas'?'PhysRL3D · SAS':'TRELLIS.2'} · 100 mm real print</span><strong>${measured.support} <small>g support</small></strong><b>${measured.percent.toFixed(0)}% of total</b><small>${measured.body} g model + ${measured.support} g support = ${measured.total} g total</small><small>Physical weighing · 1 g resolution. Support mass is the before/after difference, not a slicer estimate. Separate from the 60 mm display mesh and illustrative supports.</small><a href="#prints">See real prints</a>`;}
+       else card.textContent='Physical weight data unavailable';
+       detail.append(card);
+     }
+     return;
+   }
    if(time<WEIGH_TIME){detail.textContent='Support grams and their share of total material appear after collection.';return;}
    detail.replaceChildren();
    for(const e of bodies.filter(e=>e.g.id===selected)){
@@ -506,7 +521,7 @@ let reduced=motionPreference.matches;
    if(selected)for(const e of bodies.filter(e=>e.g.id===selected))for(const label of [e.label,e.weightLabel])labelSizes.set(label,{w:label.offsetWidth||130,h:label.offsetHeight||42});
    function place(label,point,visible){p.copy(point).project(camera);label.hidden=!visible||p.z>1||p.z< -1||Math.abs(p.x)>1.2||Math.abs(p.y)>1.2;label.style.left=`${(p.x*.5+.5)*w}px`;label.style.top=`${(-p.y*.5+.5)*h}px`;}
    for(const g of groups)place(g.label,new THREE.Vector3(g.x,g.y+(oursOnly?92:112),24),g.root.visible&&!selected);
-   for(const e of bodies){e.leader.hidden=e.weightLeader.hidden=true;const focused=e.g.id===selected;place(e.label,new THREE.Vector3(e.g.x+e.offset.position.x,e.g.y-(focused?130:41),focused?-5:10),e.offset.visible&&e.g.root.visible&&(!selected||focused));place(e.weightLabel,new THREE.Vector3(e.g.x+e.offset.position.x,e.g.y-(oursOnly?90:105),8),!e.displayOnly&&e.offset.visible&&e.g.root.visible&&sceneMode!=='slice'&&sceneMode!=='inspect'&&(focused||oursOnly&&!selected&&showcaseState?.phase==='weight')&&time<RELEASE);}
+   for(const e of bodies){e.leader.hidden=e.weightLeader.hidden=true;const focused=e.g.id===selected;place(e.label,new THREE.Vector3(e.g.x+e.offset.position.x,e.g.y-(focused?130:41),focused?-5:10),e.offset.visible&&e.g.root.visible&&(!selected||focused));place(e.weightLabel,new THREE.Vector3(e.g.x+e.offset.position.x,e.g.y-(oursOnly?90:105),8),(!e.displayOnly||Boolean(e.measuredWeight))&&e.offset.visible&&e.g.root.visible&&sceneMode!=='slice'&&sceneMode!=='inspect'&&(focused||oursOnly&&!selected&&showcaseState?.phase==='weight')&&time<RELEASE);}
    // Keep labels readable at oblique angles and extreme zoom. Short leader lines
    // preserve the connection to each original projected model or scale position.
    if(selected){
