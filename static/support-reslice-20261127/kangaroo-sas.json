@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "key": "kangaroo-sas",
+  "coordinateSystem": "Z-up",
+  "units": "mm",
+  "sourceMeshSHA256": "3b91d076f036f4d2dfe9de032409cec0c7c46d9a927bfca4851d4b4a25f0347c",
+  "sourceMeshFile": "kangaroo_SAS_seed20260826_60mm.3mf",
+  "sourceMeshBoundsMm": [
+    [
+      -18.75,
+      -18.598,
+      0.0
+    ],
+    [
+      18.75,
+      18.598,
+      60.0
+    ]
+  ],
+  "sourceKind": "existing archived paired 60 mm tree-support slice; not newly resliced",
+  "sourceSlicedProject": "kangaroo.3mf",
+  "archiveSHA256": "2677c61b3f4d0f86a729fd57f834e05c4c7ec637bc7eaa48a802894bacd4837f",
+  "gcodeSHA256": "6b431942bcb27e08098a06d72c5b7430c986366cbc82810489679e522e87ed60",
+  "projectSettingsSHA256": "c258fb3f5f23f8baa345d6d30faa62cbb53576002cb4f94e3b37c8674dcf701c",
+  "sourceGeometryVerification": {
+    "faceIndicesAndVertexOrderExactlyEqual": true,
+    "maxVertexDeltaMmByAxis": [
+      5.761999999887024e-05,
+      5.761999999887024e-05,
+      5.100000000091143e-05
+    ],
+    "toleranceMm": 0.0001,
+    "explanation": "Same indexed geometry; standalone 3MF stores four decimal places while the paired slicer project stores higher precision. Only recorded plate XY placement is removed; no fitted alignment, rotation, scaling, or repair."
+  },
+  "gcodeToDisplayTranslationMm": [
+    -235.0,
+    -160.0,
+    -0.0
+  ],
+  "scaleApplied": 1,
+  "rotationApplied": false,
+  "geometryRepairApplied": false,
+  "slicer": "BambuStudio-02.08.04.57",
+  "profile": {
+    "printer_model": "Bambu Lab H2D",
+    "printer_settings_id": "Bambu Lab H2D 0.4 nozzle",
+    "nozzle_diameter": [
+      "0.4",
+      "0.4"
+    ],
+    "layer_height": "0.2",
+    "raft_layers": "0",
+    "enable_support": "1",
+    "support_type": "tree(auto)",
+    "support_style": "default",
+    "support_threshold_angle": "45",
+    "support_on_build_plate_only": "0",
+    "support_line_width": "0.42",
+    "support_top_z_distance": "0.2",
+    "support_bottom_z_distance": "0.2",
+    "support_object_xy_distance": "0.35",
+    "tree_support_branch_angle": "45",
+    "tree_support_branch_diameter": "2",
+    "tree_support_branch_distance": "5",
+    "tree_support_branch_diameter_angle": "5"
+  },
+  "supportEndpointBoundsMm": [
+    [
+      -29.053619384765625,
+      -29.381149291992188,
+      0.20000000298023224
+    ],
+    [
+      25.675567626953125,
+      19.651992797851562,
+      48.599998474121094
+    ]
+  ],
+  "supports": {
+    "file": "kangaroo-sas-supports.bin",
+    "sha256": "4ed6763e295843ea48645fcca4a7159c195a196ae4bb10cce25a54e5e11ed563",
+    "count": 32000,
+    "fullSegmentCount": 135565,
+    "stride": 8,
+    "dtype": "float32-le",
+    "fields": [
+      "startX",
+      "startY",
+      "startZ",
+      "endX",
+      "endY",
+      "endZ",
+      "width",
+      "layerHeight"
+    ],
+    "crossSection": "Rectangular bead; endpoint Z is top, bottom is Z-layerHeight; width is unchanged from G-code.",
+    "sampling": "Uniformly spaced complete support layers, including first and last; remaining budget contains only complete endpoint-contiguous runs in source segment order. No partial-run sampling, invented segments, or widened beads.",
+    "supportLayers": 243,
+    "displayLOD": true,
+    "physicsGeometry": false,
+    "massBinding": "not the measured 100 mm print",
+    "representation": "Actual positive-extrusion Support and Support interface paths; arcs tessellated at <=0.25 mm.",
+    "purgeTowerIncluded": false,
+    "samplingAlgorithm": "whole-layers-and-continuous-paths-v2",
+    "completeDisplayedLayers": 56,
+    "supplementalCompletePaths": 3,
+    "partialContinuousPaths": 0
+  },
+  "objectSeparation": {
+    "method": "Disjoint plate XY envelopes; every support segment has both endpoints strictly on one side of separating plane.",
+    "separatingPlaneBuildXmm": 180.3489456,
+    "crossObjectSegmentCount": 0,
+    "minimumEndpointDistanceFromPlaneMm": 25.597435015234367
+  },
+  "caution": "Digital 60 mm sliced supports only, not the measured 100 mm physical prints. Breakup/cleanup motion is illustrative, not a physical simulation or support-removal measurement."
+}

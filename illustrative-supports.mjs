@@ -93,6 +93,9 @@ function floorHeight(fragment, rotation) {
   const zx = sx * sz - cx * sy * cz, zy = sx * cz + cx * sy * sz, zz = cx * cy;
   const rotatedZ = point => point[0] * zx + point[1] * zy + point[2] * zz;
   let lowest = 0;
+  // Real sliced paths can contain thousands of bars per fragment. Their
+  // conservative local bounds avoid revisiting every extrusion on every frame.
+  if (fragment.floorCorners) return -Math.min(0, ...fragment.floorCorners.map(rotatedZ)) + .08;
   for (const bar of fragment.bars) {
     const padding = Math.hypot(bar.width, bar.height) / 2;
     lowest = Math.min(lowest, rotatedZ(bar.start) - padding, rotatedZ(bar.end) - padding);

@@ -20,7 +20,7 @@
           <p class="sas-chair-status" data-sas-chair-status>Loading the original chair…</p>
           <a class="sas-chair-fallback" data-sas-chair-fallback href="static/film/sas-32s.mp4" hidden>Watch the original chair film ↗</a>
         </div>
-        <figcaption>Original SAS film · illustrative geometry, not generated checkpoints.</figcaption>
+        <figcaption>Original SAS schematic · corrected joints, not generated checkpoints.</figcaption>
       </figure>
       <div class="sas-schedule">
       <div class="sas-kept-explanation"><p><b>Standability first.</b> When too few samples reach the base model’s reference level, geometry and material receive reduced weight.</p><p><b>Emphasise what lags.</b> As the standability gate opens, the less-attained of geometry and material receives more emphasis.</p></div>
@@ -34,7 +34,6 @@
       </div>
       <p class="sas-interactive-note">Illustrative SAS mechanism based on the worked example. The slider is not a live training control and does not query or change the checkpoint.</p>
     </div>
-    <div class="inference-entry"><h3>From your image to a new 3D model.</h3><p>Connect an authenticated GPU service to run a trained PhysRL3D checkpoint. The model weights stay on the server.</p><a href="generate/">Open generation workspace</a><small>GPU connection required. This site does not currently provide public GPU inference.</small></div>
   </section>`);
   document.getElementById('comparisons').insertAdjacentHTML('afterend', `<section id="more-examples" class="release-section" aria-labelledby="more-examples-title">
     <div class="release-heading"><div><p class="eyebrow">QUALITATIVE RIGID-BODY TESTS</p><h2 id="more-examples-title">Twenty more shapes.<br><span>Every outcome included.</span></h2></div><p>Explore the supplementary comparisons.<br><a href="examples/">Open the complete case explorer</a></p></div>
@@ -72,7 +71,7 @@
       });
     };
     input.addEventListener('input',update); update();
-    import('./sas-chair.mjs?v=20261127chair3').then(({mountSASChair})=>mountSASChair(sas)).catch(error=>{
+    import('./sas-chair.mjs?v=20261127chair4').then(({mountSASChair})=>mountSASChair(sas)).catch(error=>{
       console.error('SAS chair preview unavailable',error);
       sas.querySelector('[data-sas-chair]').dataset.state='error';
       sas.querySelector('[data-sas-chair-status]').textContent='Chair preview unavailable.';

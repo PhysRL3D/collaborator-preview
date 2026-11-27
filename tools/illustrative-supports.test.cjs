@@ -142,10 +142,12 @@ test('The live viewer integrates fragments, shared collection props, dynamic leg
   const { SWEEP_START, SWEEP_END, RELEASE_TIME } = await import(sharedUrl);
   const imported = scene.match(/import\s*\{([^}]+)\}\s*from\s*['"]\.\/illustrative-supports\.mjs\?v=([^'"]+)['"]/);
   assert.ok(imported, 'the viewer loads the versioned fragment helper');
-  for (const name of ['buildIllustrativeFragments', 'illustrativeFragmentPose']) {
+  for (const name of ['illustrativeFragmentPose']) {
     assert.ok(imported[1].split(',').map(value => value.trim()).includes(name));
     assert.match(scene, new RegExp(`\\b${name}\\s*\\(`), `${name} is called, not merely imported`);
   }
+  assert.match(scene, /buildSlicedFragments\(segments\)/);
+  assert.doesNotMatch(scene, /buildIllustrativeFragments|illustrativeContacts/);
 
   const sweeper = scene.match(/entry\.sweeper\.visible\s*=\s*[^;\n]*SWEEP_START[^;\n]*;/);
   const scale = scene.match(/entry\.scale\.visible\s*=\s*[^;\n]*released[^;\n]*;/);
@@ -164,15 +166,43 @@ test('The live viewer integrates fragments, shared collection props, dynamic leg
     const section = html.match(new RegExp(`<section\\b[^>]*\\bid="${id}"[^>]*>[\\s\\S]*?<\\/section>`));
     assert.ok(section && /<span\b[^>]*\bdata-support-legend\b/.test(section[0]), `${id} exposes its dynamic legend`);
   }
-  const legendAssignment = scene.match(/supportLegend\.textContent\s*=\s*[^;\n]+;/);
-  assert.ok(legendAssignment, 'the viewer updates its own support legend');
-  for (const [selected, expected] of [['koala', 'Illustrative supports'], ['kangaroo', 'Illustrative supports'], ['chair', 'Sliced supports'], [null, 'Support fragments']]) {
+  const legendBlock = scene.match(/if\(supportLegend\)\{([\s\S]*?)\n\s*\}/);
+  assert.ok(legendBlock, 'the viewer updates its own support legend from available geometry');
+  for (const [selected, expected] of [['koala', 'Sliced tree supports'], ['kangaroo', 'Sliced tree supports'], ['chair', 'Sliced supports'], [null, 'Support fragments']]) {
     const supportLegend = {};
-    vm.runInNewContext(legendAssignment[0], { supportLegend, selected, DISPLAY_ONLY: new Set(['koala', 'kangaroo']) });
+    const selectedBodies = () => [{ chunks: [{}], slicedTreeSupports: ['koala', 'kangaroo'].includes(selected) }];
+    vm.runInNewContext(legendBlock[0], { supportLegend, selected, selectedBodies });
     assert.equal(supportLegend.textContent, expected);
   }
   const script = html.match(/<script\b[^>]*\bsrc="physics-scene\.mjs\?v=([^"]+)"[^>]*>/);
   assert.ok(script, 'the homepage loads the versioned viewer module');
   assert.match(script[1], /^20261127effects\d+$/, 'old cached viewer code cannot hide the new collection effects');
   assert.equal(imported[2], script[1], 'viewer and helper belong to the same effect release');
+});
+
+test('Missing sliced paths preserve the model and measured weights without claiming support removal', async () => {
+  const scene = fs.readFileSync(path.join(root, 'physics-scene.mjs'), 'utf8');
+  const { showcaseTimeline } = await import(pathToFileURL(path.join(root, 'showcase-timeline.mjs')).href);
+  const { RELEASE_TIME } = await import(sharedUrl);
+  const timelineAssignment = scene.match(/showcaseState\s*=\s*showcaseTimeline\(showcaseTime,[^;\n]+;/);
+  const legendBlock = scene.match(/if\(supportLegend\)\{([\s\S]*?)\n\s*\}/);
+  assert.ok(timelineAssignment && legendBlock);
+  for (const selected of ['koala', 'kangaroo']) {
+    const measuredWeight = { source: 'physical-print', heightMm: 100, support: 5 };
+    const members = [{ chunks: [], slicedTreeSupports: false, body: { visible: true }, physics: { status: 'unavailable' }, measuredWeight }];
+    const before = structuredClone(members);
+    const context = { showcaseState: null, showcaseTimeline, showcaseTime: 1, action: 'supports', members, RELEASE: RELEASE_TIME };
+    vm.runInNewContext(timelineAssignment[0], context);
+    assert.equal(context.showcaseState.phase, 'supports-unavailable');
+    const supportLegend = {};
+    vm.runInNewContext(legendBlock[0], { supportLegend, selected, selectedBodies: () => members });
+    assert.equal(supportLegend.textContent, 'Supports unavailable');
+    assert.deepEqual(members, before, 'availability must not mutate model, measured values or standing evidence');
+    // A pair can retain one valid support asset when the other one fails.
+    members.push({ chunks: [{}], slicedTreeSupports: true, physics: { status: 'unavailable' } });
+    vm.runInNewContext(timelineAssignment[0], context);
+    assert.equal(context.showcaseState.phase, 'supports');
+    vm.runInNewContext(legendBlock[0], { supportLegend, selected, selectedBodies: () => members });
+    assert.equal(supportLegend.textContent, 'Sliced tree supports');
+  }
 });

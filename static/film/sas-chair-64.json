@@ -1,8 +1,8 @@
 {
-  "version": 1,
+  "version": 2,
   "file": "sas-chair-64.webp",
-  "bytes": 650054,
-  "sha256": "e71d6a09571f1d11af766187b72a5e74935c67e9475cb05b85a188b83475cb15",
+  "bytes": 623950,
+  "sha256": "62c5a5c7e2ad80a2f23fd770a927ac6dfbf0c45ecd191c4a74eada11869cdf50",
   "source": "sas-32s.mp4",
   "sourceSHA256": "40cd39498c9e10a1113472ec41a3d0c1c5b3a29bdea3604d80b49575044c5d5b",
   "sourceFps": 30,
@@ -92,11 +92,15 @@
     3840,
     2280
   ],
+  "renderer": "tools/render-sas-chair.cjs",
+  "rendererSHA256": "d08e74cf8da045d6a53edab0ac6a4768fdfc1fba7219119edfb9e7c8f84948a5",
+  "derivation": "original-editable-SAS-schematic",
+  "correction": "Back posts and slats share seatTop - 0.02 as their embedded lower anchor throughout seat thinning.",
   "operations": [
-    "Select 64 source frames from frame 30 through frame 959",
-    "Crop the original chair region",
+    "Render the original editable chair at the same 64 film times, with connected back-to-seat joints",
+    "Retain original projection, palette, pose, slat openings and crop",
     "Lanczos downsample each frame to 480 × 285",
     "Tile 8 × 8 and encode WebP quality 90"
   ],
-  "note": "Original SAS video frames only; no generated imagery, retouching or replacement geometry. Schematic illustration, not training checkpoints or physical evidence. The first second's blank fade-in is skipped."
+  "note": "Re-rendered from the original native SVG/code schematic with corrected joints; not extracted or retouched video frames, AI imagery, a real model, training checkpoints or physical evidence. The original MP4 is unchanged."
 }

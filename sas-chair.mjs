@@ -1,8 +1,8 @@
-// Exact frames extracted from the published schematic SAS film, not a new model,
-// training/checkpoint evolution or physical evidence. A sprite avoids relying on
-// paused-video decoding on mobile browsers. Existing weight calculations stay as-is.
+// Re-rendered from the original editable SAS schematic with connected chair
+// joints, not a real model, training/checkpoint evolution or physical evidence.
+// A sprite avoids paused-video decoding. Existing weight calculations stay as-is.
 export const SAS_CHAIR_SOURCE = 'static/film/sas-32s.mp4';
-export const SAS_CHAIR_SPRITE = 'static/film/sas-chair-64.webp';
+export const SAS_CHAIR_SPRITE = 'static/film/sas-chair-64.webp?v=20261127joints1';
 export const SAS_CHAIR_CROP = Object.freeze({ x:80, y:240, width:740, height:440, sourceWidth:1920, sourceHeight:1080 });
 export const SAS_CHAIR_FRAMES = Object.freeze(Array.from({length:64},(_,i)=>Math.round(30+(959-30)*i/63)));
 

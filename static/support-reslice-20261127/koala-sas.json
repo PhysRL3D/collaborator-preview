@@ -1,0 +1,116 @@
+{
+  "version": 1,
+  "key": "koala-sas",
+  "coordinateSystem": "Z-up",
+  "units": "mm",
+  "sourceMeshSHA256": "00be3661ef26fe6fb8fb861348001365b4c154dc852ab7ff9b04158c2b25ef71",
+  "sourceMeshFile": "koala_SAS_seed20260826_60mm.3mf",
+  "sourceMeshBoundsMm": [
+    [
+      -25.3937,
+      -11.2923,
+      0.0
+    ],
+    [
+      25.3937,
+      11.2923,
+      59.9999
+    ]
+  ],
+  "sourceKind": "existing archived paired 60 mm tree-support slice; not newly resliced",
+  "sourceSlicedProject": "koala.3mf",
+  "archiveSHA256": "028ad39c00d7ae0628d792e901e346e9039f30224899121f6297800bb2d722ea",
+  "gcodeSHA256": "9ffbc4529a029c17334c57773e63f3203dab323b7a67d0c5883730f9f7edba06",
+  "projectSettingsSHA256": "c258fb3f5f23f8baa345d6d30faa62cbb53576002cb4f94e3b37c8674dcf701c",
+  "sourceGeometryVerification": {
+    "faceIndicesAndVertexOrderExactlyEqual": true,
+    "maxVertexDeltaMmByAxis": [
+      6.520000002296911e-05,
+      5.761999999887024e-05,
+      5.100000000091143e-05
+    ],
+    "toleranceMm": 0.0001,
+    "explanation": "Same indexed geometry; standalone 3MF stores four decimal places while the paired slicer project stores higher precision. Only recorded plate XY placement is removed; no fitted alignment, rotation, scaling, or repair."
+  },
+  "gcodeToDisplayTranslationMm": [
+    -235.0,
+    -160.0,
+    -0.0
+  ],
+  "scaleApplied": 1,
+  "rotationApplied": false,
+  "geometryRepairApplied": false,
+  "slicer": "BambuStudio-02.08.04.57",
+  "profile": {
+    "printer_model": "Bambu Lab H2D",
+    "printer_settings_id": "Bambu Lab H2D 0.4 nozzle",
+    "nozzle_diameter": [
+      "0.4",
+      "0.4"
+    ],
+    "layer_height": "0.2",
+    "raft_layers": "0",
+    "enable_support": "1",
+    "support_type": "tree(auto)",
+    "support_style": "default",
+    "support_threshold_angle": "45",
+    "support_on_build_plate_only": "0",
+    "support_line_width": "0.42",
+    "support_top_z_distance": "0.2",
+    "support_bottom_z_distance": "0.2",
+    "support_object_xy_distance": "0.35",
+    "tree_support_branch_angle": "45",
+    "tree_support_branch_diameter": "2",
+    "tree_support_branch_distance": "5",
+    "tree_support_branch_diameter_angle": "5"
+  },
+  "supportEndpointBoundsMm": [
+    [
+      -25.731002807617188,
+      -15.654998779296875,
+      0.20000000298023224
+    ],
+    [
+      24.03973388671875,
+      16.477066040039062,
+      48.20000076293945
+    ]
+  ],
+  "supports": {
+    "file": "koala-sas-supports.bin",
+    "sha256": "8278f3d589d14ab56e7dadce747291674599190417f845dfd371208c562a36a4",
+    "count": 32000,
+    "fullSegmentCount": 138261,
+    "stride": 8,
+    "dtype": "float32-le",
+    "fields": [
+      "startX",
+      "startY",
+      "startZ",
+      "endX",
+      "endY",
+      "endZ",
+      "width",
+      "layerHeight"
+    ],
+    "crossSection": "Rectangular bead; endpoint Z is top, bottom is Z-layerHeight; width is unchanged from G-code.",
+    "sampling": "Uniformly spaced complete support layers, including first and last; remaining budget contains only complete endpoint-contiguous runs in source segment order. No partial-run sampling, invented segments, or widened beads.",
+    "supportLayers": 241,
+    "displayLOD": true,
+    "physicsGeometry": false,
+    "massBinding": "not the measured 100 mm print",
+    "representation": "Actual positive-extrusion Support and Support interface paths; arcs tessellated at <=0.25 mm.",
+    "purgeTowerIncluded": false,
+    "samplingAlgorithm": "whole-layers-and-continuous-paths-v2",
+    "completeDisplayedLayers": 55,
+    "supplementalCompletePaths": 3,
+    "partialContinuousPaths": 0
+  },
+  "objectSeparation": {
+    "method": "Disjoint plate XY envelopes; every support segment has both endpoints strictly on one side of separating plane.",
+    "separatingPlaneBuildXmm": 174.99942015,
+    "crossObjectSegmentCount": 0,
+    "minimumEndpointDistanceFromPlaneMm": 34.26957704238282
+  },
+  "caution": "Digital 60 mm sliced supports only, not the measured 100 mm physical prints. Breakup/cleanup motion is illustrative, not a physical simulation or support-removal measurement."
+}

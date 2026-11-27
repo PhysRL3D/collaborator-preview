@@ -7,6 +7,20 @@ const vm = require('node:vm');
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
+test('standalone airplane vignette is hidden without deleting its source evidence', () => {
+  assert.match(html, /<div class="sim-only-case" hidden inert>/);
+  for (const file of ['airplane_trellis2_sim_release.jpg', 'airplane_trellis2_sim_after.jpg']) {
+    assert.ok(fs.existsSync(path.join(root, 'static/images', file)));
+  }
+});
+
+test('generation workspace is offered once in the page body, not repeated under SAS', () => {
+  assert.equal((html.match(/<section id="generate"/g)||[]).length,1);
+  const release=fs.readFileSync(path.join(root,'release-20261120.js'),'utf8');
+  assert.doesNotMatch(release, /<div class="inference-entry">/);
+  assert.match(release, /<a href="generate\/">Generate a model<\/a>/);
+});
+
 test('Quantitative section and its navigation are hidden without deleting results', () => {
   const section = html.match(/<section id="results"([^>]*)>([\s\S]*?)<\/section>/);
   assert.ok(section);

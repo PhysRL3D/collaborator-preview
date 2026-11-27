@@ -7,7 +7,8 @@ import {STANDING_DURATION,validateStandingData,sampleStanding} from './standing-
 import {buildSliceIndex,sliceHeight,intersectSlice} from './mesh-slice.mjs?v=20261119slice1';
 import {showcaseTimeline,playbackSpeed,nextExampleIndex,displayPositions,COMPARE_SECONDS,ORBIT_RADIANS_PER_SECOND} from './showcase-timeline.mjs?v=20261119merge1';
 import {measuredPrintWeight} from './measured-print-weights.mjs?v=20261127weights1';
-import {buildIllustrativeFragments,illustrativeFragmentPose} from './illustrative-supports.mjs?v=20261127effects2';
+import {illustrativeFragmentPose} from './illustrative-supports.mjs?v=20261127effects3';
+import {RESLICED_SUPPORT_ROOT,validateReslicedSupport,buildSlicedFragments,alignSlicedFragments} from './resliced-supports.mjs?v=20261127effects3';
 
 import {ORIGINAL_PENGUIN_ASSET,ORIGINAL_PENGUIN_NOTE,geometryOnlyModel,pairedExample,exampleMethods,homepagePositions} from './penguin-display.mjs?v=20261127penguin1';
 
@@ -20,34 +21,15 @@ const RELEASE=RELEASE_TIME;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const json=async url=>{const r=await fetch(url);if(!r.ok)throw Error(`${r.status}: ${url}`);return r.json()};
 const bin=async url=>{const r=await fetch(url);if(!r.ok)throw Error(`${r.status}: ${url}`);return r.arrayBuffer()};
-const illustrativeContactCache=new Map();
-
-// A small underside sampling grid positions a visual support scaffold in the
-// model's own Z-up coordinates. This is NOT a slicer or a printable toolpath.
-function illustrativeContacts(body,key){
- if(illustrativeContactCache.has(key))return illustrativeContactCache.get(key);
- body.updateWorldMatrix(true,true);
- const inverse=body.matrixWorld.clone().invert(),bounds=new THREE.Box3(),nodes=[];
- body.traverse(node=>{
-   if(!node.isMesh||!node.geometry?.attributes.position)return;
-   nodes.push(node);node.geometry.computeBoundingBox();
-   const matrix=new THREE.Matrix4().multiplyMatrices(inverse,node.matrixWorld);
-   bounds.union(node.geometry.boundingBox.clone().applyMatrix4(matrix));
- });
- const size=bounds.getSize(new THREE.Vector3()),step=Math.max(3.2,Math.max(size.x,size.y)/10);
- const nx=Math.max(2,Math.ceil(size.x/step)),ny=Math.max(2,Math.ceil(size.y/step));
- const ray=new THREE.Raycaster(),origin=new THREE.Vector3(),direction=new THREE.Vector3(0,0,1).transformDirection(body.matrixWorld),contacts=[];
- ray.far=size.z+2;
- for(let ix=0;ix<nx;ix++)for(let iy=0;iy<ny;iy++){
-   const x=bounds.min.x+(ix+.5)*size.x/nx,y=bounds.min.y+(iy+.5)*size.y/ny;
-   origin.set(x,y,bounds.min.z-.1).applyMatrix4(body.matrixWorld);ray.set(origin,direction);
-   const hit=ray.intersectObjects(nodes,false)[0];
-   if(!hit)continue;
-   const point=hit.point.clone().applyMatrix4(inverse),height=point.z;
-   if(height>4&&height<size.z*.94)contacts.push({x,y,height:height-.15});
- }
- const result={contacts,width:Math.min(4.4,step*.72)};
- illustrativeContactCache.set(key,result);return result;
+const reslicedSupportCache=new Map();
+function loadReslicedSupport(key){
+ if(!reslicedSupportCache.has(key))reslicedSupportCache.set(key,(async()=>{
+   const manifest=await json(RESLICED_SUPPORT_ROOT+key+'.json');
+   const segments=new Float32Array(await bin(RESLICED_SUPPORT_ROOT+key+'-supports.bin'));
+   validateReslicedSupport(manifest,key,segments);
+   return {manifest,fragments:buildSlicedFragments(segments)};
+ })().catch(error=>{console.warn('Verified tree supports unavailable',key,error);return null;}));
+ return reslicedSupportCache.get(key);
 }
 
 async function initialise(host){
@@ -114,7 +96,7 @@ let reduced=motionPreference.matches;
    input.querySelector('img').alt=group?`${group.name}: conditioning image`:'Select an example to see its conditioning image';
    input.querySelector('h3').textContent=group?group.name:'Seven examples';
    input.querySelector('[data-pair-number]').textContent=group?`${examples.findIndex(e=>e[0]===id)+1} / ${examples.length}`:'ALL EXAMPLES';
-   input.querySelector('[data-pair-explanation]').textContent=!group?'Select an example to inspect it. Penguin includes the original baseline.':id==='penguin'?'Same input. Left: original TRELLIS.2, defects retained. Right: PhysRL3D-SAS.':DISPLAY_ONLY.has(id)?'100 mm real-print weights · illustrative blue supports. Measurements are separate from this 60 mm display mesh.':oursOnly?'PhysRL3D · SAS output.':'One input, two methods. Both display turntables rotate at the same rate; source replay poses are unchanged.';
+   input.querySelector('[data-pair-explanation]').textContent=!group?'Select an example to inspect it. Penguin includes the original baseline.':id==='penguin'?'Same input. Left: original TRELLIS.2, defects retained. Right: PhysRL3D-SAS.':DISPLAY_ONLY.has(id)?'100 mm real-print weights · sliced tree supports. Measurements are separate from this 60 mm display mesh.':oursOnly?'PhysRL3D · SAS output.':'One input, two methods. Both display turntables rotate at the same rate; source replay poses are unchanged.';
    const methodKey=input.querySelector('.pair-method-key');
    methodKey.innerHTML=group&&pairedExample(id,oursOnly)?'<span><i></i>TRELLIS.2 <small>base generator · left</small></span><span><i></i>PhysRL3D <small>SAS · right</small></span>':'<span><i></i>PhysRL3D <small>SAS · ours</small></span>';
    input.querySelector('.pair-input-image').hidden=!group;
@@ -289,27 +271,26 @@ let reduced=motionPreference.matches;
      .catch(()=>({status:'unavailable',reason:'The rigid-body replay could not be loaded for this model.'})):
      Promise.resolve({status:'unavailable',reason:geometryOnly?`${ORIGINAL_PENGUIN_NOTE} No validated standing replay is bound to this mesh.`:displayOnly?'No validated standing replay is bound to this original display mesh.':'Rigid-body replay has not been enabled.'});
    const bodyPath=geometryOnly?ORIGINAL_PENGUIN_ASSET:displayOnly?`static/models/sas-20261118/${g.id}-${method==='sas'?'sas':'baseline'}.glb`:ROOT+key+'-body.glb';
-   const [glb,segmentsBuffer,idsBuffer,motionBuffer,physics]=await Promise.all([
-     loader.loadAsync(bodyPath),noBundle?new ArrayBuffer(0):bin(ROOT+key+'-supports.bin'),noBundle?new ArrayBuffer(0):bin(ROOT+key+'-chunk-ids.bin'),noBundle?new ArrayBuffer(0):bin(ROOT+key+'-motion-quat.bin'),physicsRequest]);
+   const [glb,segmentsBuffer,idsBuffer,motionBuffer,physics,resliced]=await Promise.all([
+     loader.loadAsync(bodyPath),noBundle?new ArrayBuffer(0):bin(ROOT+key+'-supports.bin'),noBundle?new ArrayBuffer(0):bin(ROOT+key+'-chunk-ids.bin'),noBundle?new ArrayBuffer(0):bin(ROOT+key+'-motion-quat.bin'),physicsRequest,displayOnly?loadReslicedSupport(key):null]);
    const offset=new THREE.Group();offset.position.x=pairedExample(g.id,oursOnly)?(method==='trellis2'?-64:64):0;g.root.add(offset);
    const body=new THREE.Group();offset.add(body);
+   let supportTranslation=[0,0,0];
    if(displayOnly){
      // Invert the exporter's Z-up→Y-up rotation. Keep source scale in mm;
      // translation only centres this display mesh, never a simulated body.
      const sourceFrame=new THREE.Group();sourceFrame.rotation.x=Math.PI/2;sourceFrame.add(glb.scene);
      sourceFrame.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(sourceFrame),centre=bounds.getCenter(new THREE.Vector3());
      sourceFrame.position.set(-centre.x,-centre.y,-bounds.min.z);body.add(sourceFrame);
+     supportTranslation=sourceFrame.position.toArray();
    }else body.add(glb.scene);
    glb.scene.traverse(node=>{if(node.isMesh){node.material=bodyMaterial;node.userData.example=g.id;if(!node.geometry.attributes.normal)node.geometry.computeVertexNormals();}});
    const chunks=[],segments=new Float32Array(segmentsBuffer),ids=new Uint16Array(idsBuffer),motion=new Float32Array(motionBuffer);
-   // The two display-only models get the same visual sequence (rigid fragments,
-   // fall, sweep, tray), but their scaffold and motion remain illustrative.
-   // Their 100 mm print measurements never determine this 60 mm scaffold.
-   let illustrativeSupports=false;
-   if(displayOnly){
-     illustrativeSupports=true;
-     const sampled=illustrativeContacts(body,key);
-     const fragments=buildIllustrativeFragments(sampled.contacts,{width:sampled.width,maxContacts:24});
+   // Use verified original sliced tree paths, never contact-derived substitute bars.
+   // Fragment motion is illustrative; 100 mm print measurements remain separate.
+   const slicedTreeSupports=Boolean(resliced);
+   if(slicedTreeSupports){
+     const fragments=alignSlicedFragments(resliced.fragments,supportTranslation);
      const alongX=new THREE.Vector3(1,0,0),barDirection=new THREE.Vector3();
      for(const fragment of fragments){
        const support=new THREE.InstancedMesh(supportCube,supportMaterial,fragment.bars.length);support.frustumCulled=false;
@@ -342,7 +323,7 @@ let reduced=motionPreference.matches;
    const display=new THREE.Mesh(new THREE.BoxGeometry(24,4,.5),new THREE.MeshStandardMaterial({color:0x849ba6,roughness:.4}));display.position.set(0,-11.2,3.7);scale.add(display);
    const sweeper=new THREE.Mesh(new THREE.BoxGeometry(76,2,4),new THREE.MeshStandardMaterial({color:0xa798b4,roughness:.8}));offset.add(sweeper);sweeper.visible=false;
    const label=document.createElement('div');label.className=`physics-body-label method-${method}`;label.innerHTML=`<b>${method==='sas'?'PhysRL3D':'TRELLIS.2'}</b><small>${method==='sas'?'SAS · OURS':'BASE GENERATOR'}</small><span class="standing-body-readout"><span data-standing-tilt>Awaiting release</span><span data-standing-state>Rigid-body replay</span></span>`;labels.append(label);
-   label.dataset.geometryOnly=String(geometryOnly);label.dataset.supportEffect=geometryOnly?'unavailable':illustrativeSupports?'illustrative-fragments':'sliced-fragments';label.dataset.supportChunks=String(chunks.length);label.dataset.modelKey=key;
+   label.dataset.geometryOnly=String(geometryOnly);label.dataset.supportEffect=geometryOnly?'unavailable':displayOnly?slicedTreeSupports?'resliced-tree-fragments':'unavailable':'sliced-fragments';label.dataset.supportChunks=String(chunks.length);label.dataset.modelKey=key;
    if(physics.status==='ready'&&physics.timestepSensitive){
      const badge=document.createElement('span');badge.className='standing-sensitive-badge';badge.textContent='Numerically sensitive';
      badge.title=physics.caution||'The observed motion changes with the simulation timestep; this is not robust standing evidence.';
@@ -354,7 +335,7 @@ let reduced=motionPreference.matches;
    const weightLabel=document.createElement('div');weightLabel.className='support-weight-label';weightLabel.dataset.massSource=measuredWeight?'physical-print':weight?'slicer-estimate':'unavailable';weightLabel.dataset.modelKey=key;weightLabel.innerHTML='<b>— g</b><span>Awaiting supports</span><small></small>';weightLabel.querySelector('small').textContent=measuredWeight?'Measured · 100 mm print':weight?'Slicer estimate':'Weight unavailable';labels.append(weightLabel);
    const leader=document.createElement('div'),weightLeader=document.createElement('div');
    for(const line of [leader,weightLeader]){line.className='physics-label-leader';line.hidden=true;labels.prepend(line);}
-   const entry={key,g,method,offset,baseX:offset.position.x,body,chunks,motion,physics,label,meta,weight,measuredWeight,weightLabel,leader,weightLeader,scale,sweeper,displayOnly,geometryOnly,illustrativeSupports,
+   const entry={key,g,method,offset,baseX:offset.position.x,body,chunks,motion,physics,label,meta,weight,measuredWeight,weightLabel,leader,weightLeader,scale,sweeper,displayOnly,geometryOnly,slicedTreeSupports,
      tiltLabel:label.querySelector('[data-standing-tilt]'),stateLabel:label.querySelector('[data-standing-state]'),standingFrame:null};bodies.push(entry);
    applyBody(entry,0);return entry;
  }
@@ -376,7 +357,7 @@ let reduced=motionPreference.matches;
    }
    const standing=physicsSample(entry,Math.max(0,t-RELEASE));
    entry.body.visible=true;
-   if(entry.illustrativeSupports){
+   if(entry.slicedTreeSupports){
      entry.chunks.forEach((chunk,index)=>{
        const pose=illustrativeFragmentPose(chunk.userData.fragment,index,t);
        chunk.visible=t<RELEASE;
@@ -385,7 +366,7 @@ let reduced=motionPreference.matches;
    }
    const framePos=clamp(Math.min(t,SWEEP_START)*24,0,143),a=Math.floor(framePos),b=Math.min(143,a+1),alpha=framePos-a;
    for(let c=0;c<entry.chunks.length;c++){
-     if(entry.illustrativeSupports) break;
+     if(entry.slicedTreeSupports) break;
      const chunk=entry.chunks[c];chunk.visible=t<RELEASE;
      const start=(c*144+a)*8,end=(c*144+b)*8,m=entry.motion;
      const v=k=>THREE.MathUtils.lerp(m[start+k],m[end+k],alpha);
@@ -399,7 +380,7 @@ let reduced=motionPreference.matches;
    entry.scale.visible=entry.chunks.length>0&&!released;
    entry.label.dataset.standingState=!standing?'unavailable':!released?'queued':standing.tiltDeg>10?'rotated':'within';
    entry.tiltLabel.textContent=!standing?'Test unavailable':!released?'Awaiting release':`Tilt ${standing.tiltDeg.toFixed(1)}°`;
-   entry.stateLabel.textContent=entry.geometryOnly?'Original geometry · defects retained':entry.illustrativeSupports?'Illustrative support removal · print photos verified':!standing?'Not simulated':!released?'10 s rigid-body replay':standing.state;
+   entry.stateLabel.textContent=entry.geometryOnly?'Original geometry · defects retained':entry.slicedTreeSupports?'Sliced tree supports · illustrative removal':!standing?'Not simulated':!released?'10 s rigid-body replay':standing.state;
    entry.label.title=!standing?entry.physics.reason:!released?'Starts after support collection.':
      `${standing.elapsed.toFixed(2)} / ${STANDING_DURATION.toFixed(2)} s; current tilt ${standing.tiltDeg.toFixed(2)}°; maximum tilt so far ${standing.maxTiltDeg.toFixed(2)}°. Orientation threshold only, not certified standing.`;
    // All examples share collection timing. The virtual tray is presentation
@@ -409,14 +390,17 @@ let reduced=motionPreference.matches;
    entry.weightLabel.classList.toggle('is-weighed',Boolean(weighed));
    entry.weightLabel.querySelector('b').textContent=weighed?`${shownWeight.support.toFixed(measured?0:2)} g support`:'— g';
    entry.weightLabel.querySelector('span').textContent=weighed?`${shownWeight.percent.toFixed(measured?0:1)}% of total`:t>=SWEEP_START?'Collecting supports':'Support weight';
-   entry.weightLabel.title=measured?`${measured.body} g model + ${measured.support} g removed supports = ${measured.total} g total. 100 mm physical print; scale resolution 1 g. Separate from the 60 mm display mesh and illustrative blue supports.`:entry.weight?`Support / (body + support): ${entry.weight.support} / (${entry.weight.body} + ${entry.weight.support}) g. Slicer estimate, not a physical measurement.`:'Weight data unavailable';
+   entry.weightLabel.title=measured?`${measured.body} g model + ${measured.support} g removed supports = ${measured.total} g total. 100 mm physical print; scale resolution 1 g. Separate from the 60 mm display mesh and sliced tree supports.`:entry.weight?`Support / (body + support): ${entry.weight.support} / (${entry.weight.body} + ${entry.weight.support}) g. Slicer estimate, not a physical measurement.`:'Weight data unavailable';
  }
  function updateUI(){
    const state=showcaseState||showcaseTimeline(showcaseTime,{action,hasReplay:false}),seconds=state.replayTime;
-   const names={inspect:'Interactive geometry · not a simulation',supports:time<.9?'Supports attached':time<SWEEP_START?'Supports break apart':DISPLAY_ONLY.has(selected)?'Illustrative support removal':'Collecting sliced supports',weight:DISPLAY_ONLY.has(selected)?'100 mm real-print weight & support share':selected?'Slicer-estimated support weight & share':'Support weights · sources labelled below',slice:'Top-to-bottom display-mesh cutaway',standing:'Validated precomputed standing replay',unavailable:'Standing replay unavailable · not simulated','supports-unavailable':'Support animation unavailable'};
+   const names={inspect:'Interactive geometry · not a simulation',supports:time<.9?'Supports attached':time<SWEEP_START?'Supports break apart':DISPLAY_ONLY.has(selected)?'Collecting tree supports':'Collecting sliced supports',weight:DISPLAY_ONLY.has(selected)?'100 mm real-print weight & support share':selected?'Slicer-estimated support weight & share':'Support weights · sources labelled below',slice:'Top-to-bottom display-mesh cutaway',standing:'Validated precomputed standing replay',unavailable:'Standing replay unavailable · not simulated','supports-unavailable':'Support animation unavailable'};
    phase.textContent=ready?(selected&&!selectedBodies().length?'This model could not load · no substitute is shown':names[state.phase]):'Loading 3D examples';
    const supportLegend=host.querySelector('[data-support-legend]');
-   if(supportLegend)supportLegend.textContent=DISPLAY_ONLY.has(selected)?'Illustrative supports':selected?'Sliced supports':'Support fragments';
+   if(supportLegend){
+     const available=selectedBodies().filter(entry=>entry.chunks.length>0);
+     supportLegend.textContent=!available.length?'Supports unavailable':!selected?'Support fragments':available.some(entry=>entry.slicedTreeSupports)?'Sliced tree supports':'Sliced supports';
+   }
    const timed=state.phase==='standing'||state.phase==='slice';
    clock.textContent=state.phase==='standing'?`${seconds.toFixed(1)} / 10.0 s`:state.phase==='slice'?`${state.localTime.toFixed(1)} / 9.0 s`:'—';
    clock.parentElement.querySelector('span').textContent=state.phase==='standing'?'PRECOMPUTED REPLAY':state.phase==='slice'?'CUTAWAY ANIMATION':state.phase==='unavailable'?'NO VALIDATED REPLAY':'ILLUSTRATIVE ANIMATION';
@@ -462,7 +446,7 @@ let reduced=motionPreference.matches;
      for(const e of bodies.filter(e=>e.g.id===selected)){
        const card=document.createElement('div');card.className='support-mass-card';card.dataset.massSource='physical-print';
        const measured=e.measuredWeight;
-       if(measured){card.innerHTML=`<span>${e.method==='sas'?'PhysRL3D · SAS':'TRELLIS.2'} · 100 mm real print</span><strong>${measured.support} <small>g support</small></strong><b>${measured.percent.toFixed(0)}% of total</b><small>${measured.body} g model + ${measured.support} g support = ${measured.total} g total</small><small>Physical weighing · 1 g resolution. Support mass is the before/after difference, not a slicer estimate. Separate from the 60 mm display mesh and illustrative supports.</small><a href="#prints">See real prints</a>`;}
+       if(measured){card.innerHTML=`<span>${e.method==='sas'?'PhysRL3D · SAS':'TRELLIS.2'} · 100 mm real print</span><strong>${measured.support} <small>g support</small></strong><b>${measured.percent.toFixed(0)}% of total</b><small>${measured.body} g model + ${measured.support} g support = ${measured.total} g total</small><small>Physical weighing · 1 g resolution. Support mass is the before/after difference, not a slicer estimate. Separate from the 60 mm display mesh and sliced tree supports.</small><a href="#prints">See real prints</a>`;}
        else card.textContent='Physical weight data unavailable';
        detail.append(card);
      }
@@ -491,7 +475,7 @@ let reduced=motionPreference.matches;
    // Inspection visibility is presentation-only, not a filter on evidence in
    // the next mode (including a paused transition into a standing replay).
    const members=bodies.filter(entry=>!selected||entry.g.id===selected);
-   showcaseState=showcaseTimeline(showcaseTime,{action,hasReplay:members.some(entry=>entry.physics.status==='ready'),supportAvailable:members.length>0,releaseTime:RELEASE});
+   showcaseState=showcaseTimeline(showcaseTime,{action,hasReplay:members.some(entry=>entry.physics.status==='ready'),supportAvailable:members.some(entry=>entry.chunks.length>0),releaseTime:RELEASE});
    duration=showcaseState.total;
    if(force||lastShowcasePhase!==showcaseState.phase){
      const keepPlaying=playing;savedSliceState=null;
@@ -636,7 +620,7 @@ let reduced=motionPreference.matches;
  host.dataset.replayCount=String(bodies.filter(b=>b.physics.status==='ready').length);
  syncMethodLabels();
  const standingSummary=host.querySelector('[data-standing-summary]');if(standingSummary)standingSummary.textContent=`${host.dataset.replayCount} of ${bodies.length} models have a validated 10-second rigid-body replay. Unavailable models are explicitly marked and are not classified.`;
- host.dataset.models=String(count);host.dataset.engine=simulationReady?'MuJoCo precomputed replay':'Illustrative support removal and slicer-estimated weighing';
+ host.dataset.models=String(count);host.dataset.engine=simulationReady?'MuJoCo precomputed replay':'Collecting tree supports and slicer-estimated weighing';
  fit(selected,true);applyShowcase(true);emitSelection();updateUI();schedule();host.dispatchEvent(new CustomEvent('physrl3d:ready',{detail:{mode:sceneMode,showcase:host.dataset.showcase,models:count},bubbles:true}));
 }
 function startViewer(host){if(host.dataset.initialising==='true')return;host.dataset.initialising='true';initialise(host).catch(error=>{

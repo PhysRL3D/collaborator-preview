@@ -6,6 +6,7 @@ const root=path.resolve(__dirname,'..');
 const source=name=>fs.readFileSync(path.join(root,name),'utf8');
 const load=import(pathToFileURL(path.join(root,'sas-chair.mjs')).href);
 const hash=buffer=>crypto.createHash('sha256').update(buffer).digest('hex');
+const renderer=require('./render-sas-chair.cjs');
 
 function fixture(){
   class Surface extends EventTarget{
@@ -31,11 +32,11 @@ function fixture(){
   return {sas,image,status,fallback,host,input,doc,get observer(){return observer;}};
 }
 
-test('chair sprite is traced to the unchanged original schematic film, not a replacement GLB',async()=>{
+test('chair sprite is re-rendered from the original editable schematic while the source film stays unchanged',async()=>{
   const {SAS_CHAIR_SOURCE,SAS_CHAIR_SPRITE,SAS_CHAIR_CROP,SAS_CHAIR_FRAMES}=await load;
   const film=JSON.parse(source('static/film/sas-manifest.json'));
   const manifest=JSON.parse(source('static/film/sas-chair-64.json'));
-  const sprite=fs.readFileSync(path.join(root,SAS_CHAIR_SPRITE));
+  const sprite=fs.readFileSync(path.join(root,SAS_CHAIR_SPRITE.split('?')[0]));
   assert.equal(SAS_CHAIR_SOURCE,'static/film/sas-32s.mp4');
   assert.equal(hash(fs.readFileSync(path.join(root,SAS_CHAIR_SOURCE))),film.sha256);
   assert.equal(manifest.sourceSHA256,film.sha256);
@@ -46,8 +47,36 @@ test('chair sprite is traced to the unchanged original schematic film, not a rep
   assert.deepEqual(manifest.crop,SAS_CHAIR_CROP);
   assert.deepEqual(manifest.sourceFrames,SAS_CHAIR_FRAMES);
   assert.deepEqual(manifest.dimensions,[3840,2280]);
+  assert.equal(manifest.version,2);
+  assert.equal(manifest.derivation,'original-editable-SAS-schematic');
+  assert.equal(manifest.renderer,'tools/render-sas-chair.cjs');
+  assert.equal(manifest.rendererSHA256,hash(fs.readFileSync(path.join(root,manifest.renderer))));
+  assert.match(manifest.correction,/seatTop - 0\.02/);
+  assert.match(manifest.note,/not extracted or retouched video frames/);
+  assert.match(manifest.note,/original MP4 is unchanged/);
   assert.match(film.note,/Schematic geometry.*not checkpoint evolution/);
   assert.doesNotMatch(source('sas-chair.mjs'),/GLTFLoader|\.glb|requestAnimationFrame|\.play\(|currentTime|setInterval/);
+});
+
+test('back posts, all four slats and all legs stay embedded in the thinning seat at every frame',async()=>{
+  const {SAS_CHAIR_FRAMES,SAS_CHAIR_CROP}=await load;
+  assert.deepEqual(renderer.SOURCE_FRAMES,SAS_CHAIR_FRAMES);
+  assert.deepEqual(renderer.CROP,SAS_CHAIR_CROP);
+  for(const frame of SAS_CHAIR_FRAMES){
+    const state=renderer.stateAt(frame/30),g=renderer.chairGeometry(state),svg=renderer.chairSvgAt(frame/30);
+    assert.ok(g.backBottom>g.seatBottom&&g.backBottom<g.seatTop,`back/seat overlap at ${frame}`);
+    assert.ok(g.legTop>g.seatBottom&&g.legTop<g.seatTop,`leg/seat overlap at ${frame}`);
+    assert.ok(Math.abs(g.seatTop-g.backBottom-.02)<1e-12);
+    const backZ=-.52+(.17-.07*state.detail);
+    const parts=[[-.72,-.57,2.06,backZ],[.57,.72,2.06,backZ],...[-.37,-.12,.13,.38].map(x=>[x-.045,x+.045,1.87,-.41])];
+    for(const [left,right,top,z] of parts){
+      const points=[[left,g.backBottom,z],[right,g.backBottom,z],[right,top,z],[left,top,z]].map(p=>renderer.project(p).join(',')).join(' ');
+      assert.ok(svg.includes(`points="${points}"`),`drawn component uses embedded anchor at ${frame}`);
+    }
+    assert.doesNotMatch(svg,/NaN|Infinity/);
+  }
+  assert.equal(renderer.chairGeometry(renderer.stateAt(1)).thin,.28);
+  assert.ok(Math.abs(renderer.chairGeometry(renderer.stateAt(31.966)).thin-.12)<1e-12);
 });
 
 test('all 64 frame positions are deterministic, reversible and skip the blank intro',async()=>{
@@ -76,7 +105,7 @@ test('lazy sprite load and rapid slider input select the latest frame without a 
   assert.equal(f.observer.options.rootMargin,'300px 0px');
   f.observer.intersect(true);
   assert.equal(f.image.requests,1);
-  assert.equal(f.image.src,'static/film/sas-chair-64.webp');
+  assert.equal(f.image.src,'static/film/sas-chair-64.webp?v=20261127joints1');
   f.input.value='25';f.input.emit('input');
   f.input.value='100';f.input.emit('input');
   f.image.emit('load');
@@ -118,8 +147,8 @@ test('existing explanations, weights, slider and full original video remain unch
   assert.match(js,/const fidelity=Math\.round\(20\+24\*p\)/);
   assert.match(js,/const material=100-stand-fidelity/);
   assert.match(js,/input\.addEventListener\('input',update\)/);
-  assert.match(js,/sas-chair\.mjs\?v=20261127chair3/);
-  assert.match(js,/Original SAS film · illustrative geometry, not generated checkpoints/);
+  assert.match(js,/sas-chair\.mjs\?v=20261127chair4/);
+  assert.match(js,/Original SAS schematic · corrected joints, not generated checkpoints/);
   assert.match(js,/<img data-sas-chair-image/);
   assert.doesNotMatch(js,/data-sas-chair-video/);
 });
