@@ -18,7 +18,7 @@ export const PRINT_EVIDENCE = Object.freeze({
   title:'Koala',
   videos:[
    {stem:'koala_pair_front',caption:'Front view · TRELLIS.2 left, PhysRL3D-SAS right. Both physical prints stand in this footage.'},
-   {stem:'koala_pair_back',caption:'Rear view · PhysRL3D-SAS left, TRELLIS.2 right. Both physical prints stand in this footage.'}
+   {stem:'koala_pair_back',caption:'Another view · PhysRL3D-SAS left, TRELLIS.2 right. Both physical prints stand in this footage.'}
   ],
   photos:[
    {stem:'koala_trellis2_supports',method:'trellis2',caption:'TRELLIS.2 · physical print with blue supports.'},

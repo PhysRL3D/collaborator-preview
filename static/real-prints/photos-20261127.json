@@ -1,0 +1,36 @@
+{
+  "description": "Real photographs supplied and identified by the project owner on 2026-11-27. Web copies are resized to 1920 x 1280 and JPEG-reencoded with metadata removed; no crop, retouching, or generated content.",
+  "photos": [
+    {
+      "source": "DSC09584.JPG",
+      "sourceSha256": "111316614b42d70f707078329d8411eb77bc7d9076194e4274fc25c320063691",
+      "webFile": "penguin-sas-static-20261127.jpg",
+      "webSha256": "9d94c75ac2b2271da4c0295ddbbf74c26cf9cac1a0de15108fcadd2d1aeded72",
+      "identity": "PhysRL3D-SAS physical penguin print",
+      "massBinding": null,
+      "viewerMeshBinding": null
+    },
+    {
+      "source": "DSC09596.JPG",
+      "sourceSha256": "f086b72973702e00e9d8d3cbbb6b9d6c6a5e2f85c8ada4d7cbbd68a45bfd6b52",
+      "webFile": "dog-sas-static-20261127.jpg",
+      "webSha256": "2a28f9d22b8ba50c7636536d4c868d48a647bd9c0870423f120c217e5f607f55",
+      "identity": "PhysRL3D-SAS physical dog print",
+      "massBinding": null,
+      "viewerMeshBinding": null
+    },
+    {
+      "source": "DSC09609.JPG",
+      "sourceSha256": "99f7217844c6b5c3a82f3ffa386c414c693981be0410abff65971e8dd72c4d40",
+      "webFile": "dog-pair-rear-20261127.jpg",
+      "webSha256": "9f6a8cf55529b791c5e539518661c4a7c787f2eeddc76e01533a70808ef12bb7",
+      "identity": "Rear view of physical dog prints: TRELLIS.2 left, PhysRL3D-SAS right",
+      "massBinding": null,
+      "viewerMeshBinding": null
+    }
+  ],
+  "captionCorrections": [
+    "The koala_pair_back filename is historical: the owner clarified that the footage is not a rear view. Its existing SAS-left/TRELLIS.2-right order is retained.",
+    "The owner identified DSC09568.jpg as the PhysRL3D-SAS Christmas-tree print."
+  ]
+}

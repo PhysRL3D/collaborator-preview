@@ -32,7 +32,7 @@ Open `index.html` in a browser, or serve the folder (`npx serve .`) to get the s
 | `kangaroo_pair_halfspeed` | both kangaroos after support removal; TRELLIS.2 (left) falls, PhysRL3D-SAS (right) stands; half speed |
 | `kangaroo_trellis2_falls_a` / `_b` | the TRELLIS.2 kangaroo released by hand, falling (real time) |
 | `koala_pair_front` | both koalas standing, front view: TRELLIS.2 left, PhysRL3D-SAS right |
-| `koala_pair_back` | the same koalas from behind (iPhone HDR clip tone-mapped to SDR): PhysRL3D-SAS left, TRELLIS.2 right |
+| `koala_pair_back` | another view of the same koalas (legacy filename; not a rear view; iPhone HDR clip tone-mapped to SDR): PhysRL3D-SAS left, TRELLIS.2 right |
 
 To recreate the display meshes from a verified local archive, set `PHYSRL3D_MESH_SOURCE` and run `tools/export_web_meshes.py`. The script intentionally does not embed a local archive path.
 
