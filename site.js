@@ -39,7 +39,10 @@ document.getElementById('copy-citation').onclick=async()=>{try{await navigator.c
 // and standing routes remain owned by showcase-media.mjs, not this handler.
 function routeLegacySection(){
  const hash=window.location.hash;
- const target={'#simulation':'support-examples','#examples':'prints','#highlights':'results'}[hash];
+ // The visual preview temporarily hides quantitative results; old shared links
+ // should land on the visible paired examples instead of an empty section.
+ const resultsHidden=document.getElementById('results')?.hidden;
+ const target={'#simulation':'support-examples','#examples':'prints','#highlights':resultsHidden?'comparisons':'results','#results':resultsHidden?'comparisons':null}[hash];
  if(!target)return;
  if(hash==='#simulation'){
   const host=document.getElementById('physics-viewer');
