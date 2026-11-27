@@ -12,6 +12,7 @@
     <div class="film-meta"><p>Mechanism illustration using the paper's worked example, not training logs or generated checkpoints. The clock shows clip time, not training epochs.</p><a href="film/#sas">Open animation</a><a href="static/film/sas-32s.mp4" download>Download MP4</a></div>
     <div class="sas-interactive" data-sas-interactive>
       <div class="sas-interactive-heading"><div><p class="eyebrow">INTERACTIVE MECHANISM</p><h3>Move through the schedule.</h3></div><p>Drag the training-progress slider to see how the illustrative gate shifts emphasis from standability toward geometry and material.</p></div>
+      <div class="sas-kept-explanation"><p><b>Standability first.</b> When too few samples reach the base model’s reference level, geometry and material receive reduced weight.</p><p><b>Emphasise what lags.</b> As the standability gate opens, the less-attained of geometry and material receives more emphasis.</p></div>
       <label class="sas-progress"><span>Training progress</span><input data-sas-progress type="range" min="0" max="100" value="0" step="1"><output data-sas-progress-value>0%</output></label>
       <div class="sas-bars" aria-live="polite">
         <div class="sas-bar-row"><span>Standability gate</span><div class="sas-bar-track"><i data-sas-bar="stand"></i></div><output data-sas-value="stand">70%</output></div>
