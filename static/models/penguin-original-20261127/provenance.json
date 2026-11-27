@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "object": "penguin",
+  "method": "TRELLIS.2",
+  "generation": "original v1, 2026-11-18",
+  "inputSHA256": "a72521fea437ac34d2e9bea909637a3f87120dfa6660f2ddb3441d645e7ea343",
+  "sourceFile": "penguin_trellis2.npz",
+  "sourceSHA256": "73cd7e805868ef29cebede8a8b06421ffbb10413cd35169206abe963496cf304",
+  "source3mfFile": "penguin_trellis2_white_blue_H2D_60mm_sliced.3mf",
+  "source3mfSHA256": "7189fdbaa4cfc5e1b5ae5f1e204c16cc7effa0ebfa13309ad2b44780c1ea9f0f",
+  "sourceFaceIndexSHA256": "267c3fff06c386d8a17fdb713f5d38b9b28b02dba62919e80bd9fe78e52e5e1a",
+  "actual3mfFloat32PositionsAndIndicesMatch": true,
+  "coordinateSystem": "Z-up",
+  "units": "mm",
+  "sourceBuildToDisplayTranslationMm": [
+    -175.02990163454064,
+    -159.9877074386536,
+    -0.0
+  ],
+  "additionalExportTranslationMm": [
+    0,
+    0,
+    0
+  ],
+  "additionalRotation": "none",
+  "scale": 1,
+  "boundsMm": [
+    [
+      -30.09132957458496,
+      -13.862679481506348,
+      0.0
+    ],
+    [
+      30.09132957458496,
+      13.862679481506348,
+      57.29999923706055
+    ]
+  ],
+  "displayBoundsMm": [
+    [-30.093727111816406, -13.862679481506348, -0.0000013120900348440045],
+    [30.091331481933594, 13.862683296203613, 57.29999923706055]
+  ],
+  "sourceComponents": 2,
+  "displayComponents": 2,
+  "components": [
+    {
+      "component": 0,
+      "source": {
+        "vertices": 1194994,
+        "triangles": 2390344,
+        "edges": 3585516,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0,
+        "eulerCharacteristic": -178,
+        "boundsMm": [
+          [
+            -30.09132957458496,
+            -13.862679481506348,
+            0.0
+          ],
+          [
+            30.09132957458496,
+            13.862679481506348,
+            52.70000076293945
+          ]
+        ]
+      },
+      "display": {
+        "vertices": 119822,
+        "triangles": 240000,
+        "edges": 360000,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0,
+        "eulerCharacteristic": -178,
+        "boundsMm": [
+          [
+            -30.093727111816406,
+            -13.862679481506348,
+            -1.3120900348440045e-06
+          ],
+          [
+            30.091331481933594,
+            13.862683296203613,
+            52.71498107910156
+          ]
+        ]
+      },
+      "exactGeometryRetained": false,
+      "sourcePositionSHA256": "deebe681ee2378dee9d4bbdc96c934967ebde6c8f7f1a3bb77be87cf4e2e81f1",
+      "sourceIndicesSHA256": "6b9db1369211d33bff10cf15e6aa89067347ea13299530feecf281147f90e4ca",
+      "displayPositionSHA256": "bafb77b7adb896ef20f9ba6f73efc0c58e6bc84e31f10d2709075ead1abd9a5a",
+      "displayIndicesSHA256": "b5b0723dc1409919476ec3d0abca33230d75a37b18c31318aed7d7d972a8bee6"
+    },
+    {
+      "component": 1,
+      "source": {
+        "vertices": 11688,
+        "triangles": 23420,
+        "edges": 35130,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0,
+        "eulerCharacteristic": -22,
+        "boundsMm": [
+          [
+            -3.74185848236084,
+            -10.8292236328125,
+            52.900001525878906
+          ],
+          [
+            3.3247618675231934,
+            -5.556204319000244,
+            57.29999923706055
+          ]
+        ]
+      },
+      "display": {
+        "vertices": 11688,
+        "triangles": 23420,
+        "edges": 35130,
+        "boundaryEdges": 0,
+        "nonManifoldEdges": 0,
+        "eulerCharacteristic": -22,
+        "boundsMm": [
+          [
+            -3.74185848236084,
+            -10.8292236328125,
+            52.900001525878906
+          ],
+          [
+            3.3247618675231934,
+            -5.556204319000244,
+            57.29999923706055
+          ]
+        ]
+      },
+      "exactGeometryRetained": true,
+      "sourcePositionSHA256": "8c9ed7247e20206ac5ed00dbe9b20fcbe68373db4b9f0ddc3cd9c163e666a184",
+      "sourceIndicesSHA256": "8cb6596ed8a7063f570cc496cec5844a9c4d7b98d1eaf1426b37b4041e70c982",
+      "displayPositionSHA256": "8c9ed7247e20206ac5ed00dbe9b20fcbe68373db4b9f0ddc3cd9c163e666a184",
+      "displayIndicesSHA256": "8cb6596ed8a7063f570cc496cec5844a9c4d7b98d1eaf1426b37b4041e70c982"
+    }
+  ],
+  "displayLODOnly": true,
+  "physicsGeometry": false,
+  "operations": [
+    "Optional collapse display LOD on largest connected component only",
+    "Float32 positions and normals; uint32 indices"
+  ],
+  "prohibitedOperationsPerformed": [],
+  "defects": [
+    "Original detached fragment retained exactly",
+    "Original open-head shell is not repaired"
+  ],
+  "caution": "Display-mesh cutaway only; not internal infill, a printability guarantee, support extraction, or a standing replay.",
+  "file": "penguin-trellis2.glb",
+  "bytes": 6319012,
+  "sha256": "ed5d0e343e0ea4eed654d324941059bc0b71a91c0b37c78e4ba9d883ebfbc046"
+}

@@ -41,5 +41,5 @@ test('Both film entry points use the new media, captions and download URL', () =
     assert.doesNotMatch(text, /physrl3d-50s\.mp4|50 SECONDS|50-second|silent, with on-screen text/i);
     assert.match(text, /sas-32s\.mp4/);
   }
-  assert.match(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), /release-20261120\.js\?v=20261127method1/);
+  assert.match(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), /release-20261120\.js\?v=20261127chair3/);
 });

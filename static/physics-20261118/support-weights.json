@@ -91,7 +91,7 @@
     "Chair TRELLIS.2, chair SAS, and penguin SAS contain a small brim in the white model channel; no separate brim mass is reported in the small result metadata.",
     "Christmas tree SAS uses less support mass than TRELLIS.2 but a higher support percentage because its total model-plus-support mass is lower.",
     "The two poodle models retain different original print orientations; these examples are qualitative, not a matched-pose benchmark.",
-    "No invalid penguin TRELLIS.2 example is included."
+    "No penguin TRELLIS.2 support-weight estimate is included in this dataset. The website separately shows its original defective geometry for cutaway inspection, without a support-mass or standing claim."
   ],
   "field_definitions": {
     "body_g": "Slicer main model-channel mass (white slot 1), including brim where configured; not strictly cleaned-object mass",

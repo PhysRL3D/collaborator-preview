@@ -12,12 +12,25 @@
     <div class="film-meta"><p>Mechanism illustration using the paper's worked example, not training logs or generated checkpoints. The clock shows clip time, not training epochs.</p><a href="film/#sas">Open animation</a><a href="static/film/sas-32s.mp4" download>Download MP4</a></div>
     <div class="sas-interactive" data-sas-interactive>
       <div class="sas-interactive-heading"><div><p class="eyebrow">INTERACTIVE MECHANISM</p><h3>Move through the schedule.</h3></div><p>Drag the training-progress slider to see how the illustrative gate shifts emphasis from standability toward geometry and material.</p></div>
+      <div class="sas-mechanism-grid">
+      <figure class="sas-chair" data-sas-chair data-state="loading">
+        <div class="sas-chair-header"><span>ONE ILLUSTRATIVE CHAIR</span><span aria-hidden="true">↔</span></div>
+        <div class="sas-chair-stage" role="img" aria-label="The purple schematic chair from the original SAS film, synchronized with the illustrative progress slider.">
+          <img data-sas-chair-image alt="" aria-hidden="true" decoding="async" width="3840" height="2280" hidden>
+          <p class="sas-chair-status" data-sas-chair-status>Loading the original chair…</p>
+          <a class="sas-chair-fallback" data-sas-chair-fallback href="static/film/sas-32s.mp4" hidden>Watch the original chair film ↗</a>
+        </div>
+        <figcaption>Original SAS film · illustrative geometry, not generated checkpoints.</figcaption>
+      </figure>
+      <div class="sas-schedule">
       <div class="sas-kept-explanation"><p><b>Standability first.</b> When too few samples reach the base model’s reference level, geometry and material receive reduced weight.</p><p><b>Emphasise what lags.</b> As the standability gate opens, the less-attained of geometry and material receives more emphasis.</p></div>
       <label class="sas-progress"><span>Training progress</span><input data-sas-progress type="range" min="0" max="100" value="0" step="1"><output data-sas-progress-value>0%</output></label>
       <div class="sas-bars" aria-live="polite">
         <div class="sas-bar-row"><span>Standability gate</span><div class="sas-bar-track"><i data-sas-bar="stand"></i></div><output data-sas-value="stand">70%</output></div>
         <div class="sas-bar-row"><span>Geometry / fidelity</span><div class="sas-bar-track"><i data-sas-bar="fidelity"></i></div><output data-sas-value="fidelity">20%</output></div>
         <div class="sas-bar-row"><span>Material efficiency</span><div class="sas-bar-track"><i data-sas-bar="material"></i></div><output data-sas-value="material">10%</output></div>
+      </div>
+      </div>
       </div>
       <p class="sas-interactive-note">Illustrative SAS mechanism based on the worked example. The slider is not a live training control and does not query or change the checkpoint.</p>
     </div>
@@ -59,5 +72,11 @@
       });
     };
     input.addEventListener('input',update); update();
+    import('./sas-chair.mjs?v=20261127chair3').then(({mountSASChair})=>mountSASChair(sas)).catch(error=>{
+      console.error('SAS chair preview unavailable',error);
+      sas.querySelector('[data-sas-chair]').dataset.state='error';
+      sas.querySelector('[data-sas-chair-status]').textContent='Chair preview unavailable.';
+      sas.querySelector('[data-sas-chair-fallback]').hidden=false;
+    });
   }
 })();

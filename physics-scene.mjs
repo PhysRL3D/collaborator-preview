@@ -7,7 +7,9 @@ import {STANDING_DURATION,validateStandingData,sampleStanding} from './standing-
 import {buildSliceIndex,sliceHeight,intersectSlice} from './mesh-slice.mjs?v=20261119slice1';
 import {showcaseTimeline,playbackSpeed,nextExampleIndex,displayPositions,COMPARE_SECONDS,ORBIT_RADIANS_PER_SECOND} from './showcase-timeline.mjs?v=20261119merge1';
 import {measuredPrintWeight} from './measured-print-weights.mjs?v=20261127weights1';
-import {buildIllustrativeFragments,illustrativeFragmentPose} from './illustrative-supports.mjs?v=20261127effects1';
+import {buildIllustrativeFragments,illustrativeFragmentPose} from './illustrative-supports.mjs?v=20261127effects2';
+
+import {ORIGINAL_PENGUIN_ASSET,ORIGINAL_PENGUIN_NOTE,geometryOnlyModel,pairedExample,exampleMethods,homepagePositions} from './penguin-display.mjs?v=20261127penguin1';
 
 const ROOT='static/physics-20261118/';
 const STANDING_ROOT='static/standing-20261119/';
@@ -110,9 +112,11 @@ let reduced=motionPreference.matches;
    const input=host.querySelector('.pair-input');
    input.querySelector('img').src=inputSource(id||'chair');
    input.querySelector('img').alt=group?`${group.name}: conditioning image`:'Select an example to see its conditioning image';
-   input.querySelector('h3').textContent=group?group.name:'Seven PhysRL3D examples';
-   input.querySelector('[data-pair-number]').textContent=group?`${examples.findIndex(e=>e[0]===id)+1} / ${examples.length}`:'ALL SAS EXAMPLES';
-   input.querySelector('[data-pair-explanation]').textContent=!group?'Select an example to inspect its PhysRL3D output.':DISPLAY_ONLY.has(id)?'100 mm real-print weights · illustrative blue supports. Measurements are separate from this 60 mm display mesh.':oursOnly?'PhysRL3D · SAS output.':id==='penguin'?'SAS output only. Baseline is being rechecked.':'One input, two methods. Both display turntables rotate at the same rate; source replay poses are unchanged.';
+   input.querySelector('h3').textContent=group?group.name:'Seven examples';
+   input.querySelector('[data-pair-number]').textContent=group?`${examples.findIndex(e=>e[0]===id)+1} / ${examples.length}`:'ALL EXAMPLES';
+   input.querySelector('[data-pair-explanation]').textContent=!group?'Select an example to inspect it. Penguin includes the original baseline.':id==='penguin'?'Same input. Left: original TRELLIS.2, defects retained. Right: PhysRL3D-SAS.':DISPLAY_ONLY.has(id)?'100 mm real-print weights · illustrative blue supports. Measurements are separate from this 60 mm display mesh.':oursOnly?'PhysRL3D · SAS output.':'One input, two methods. Both display turntables rotate at the same rate; source replay poses are unchanged.';
+   const methodKey=input.querySelector('.pair-method-key');
+   methodKey.innerHTML=group&&pairedExample(id,oursOnly)?'<span><i></i>TRELLIS.2 <small>base generator · left</small></span><span><i></i>PhysRL3D <small>SAS · right</small></span>':'<span><i></i>PhysRL3D <small>SAS · ours</small></span>';
    input.querySelector('.pair-input-image').hidden=!group;
    if(oursOnly)host.querySelector('[data-physics-overview]').setAttribute('aria-pressed',String(!id));
    else host.querySelector('[data-physics-overview]').removeAttribute('aria-pressed');
@@ -139,7 +143,7 @@ let reduced=motionPreference.matches;
    if(group&&!mobileLayout)insets.left=Math.max(insets.left,(input.getBoundingClientRect().right-rect.left)/scaleX+16);
    labelSafeArea=insets;
    const singleInspect=sceneMode==='inspect'&&visibleMethod!=='both';
-   const fitted=fitScene(centres,width,height,insets,oursOnly||singleInspect?{halfWidth:85,front:95,back:105,height:115}:undefined);
+   const fitted=fitScene(centres,width,height,insets,(singleInspect||(oursOnly&&group&&!pairedExample(id,oursOnly)))?{halfWidth:85,front:95,back:105,height:115}:undefined);
    fittedDistance=fitted.distance;
    viewGoal={x:fitted.offsetX,y:fitted.offsetY};
    cameraGoal=new THREE.Vector3(...fitted.position);targetGoal=new THREE.Vector3(...fitted.target);
@@ -152,8 +156,8 @@ let reduced=motionPreference.matches;
    for(const group of groups){
      const members=bodies.filter(body=>body.g.id===group.id),available=members.filter(body=>body.physics.status==='ready').length;
      const unavailable=sceneMode==='standing'&&available<members.length;
-     group.label.querySelector('small').textContent=unavailable?`${available} / ${members.length} replays available`:oursOnly?'PhysRL3D · SAS':group.id==='penguin'?'SAS only':'TRELLIS.2 / PhysRL3D';
-     group.button.querySelector('small').textContent=DISPLAY_ONLY.has(group.id)?'Print + supports':unavailable?`${available} / ${members.length} replays available`:oursOnly||group.id==='penguin'?'SAS only':'Compare pair';
+     group.label.querySelector('small').textContent=unavailable?`${available} / ${members.length} replays available`:pairedExample(group.id,oursOnly)?'TRELLIS.2 / PhysRL3D':'PhysRL3D · SAS';
+     group.button.querySelector('small').textContent=DISPLAY_ONLY.has(group.id)?'Print + supports':unavailable?`${available} / ${members.length} replays available`:pairedExample(group.id,oursOnly)?'Compare pair':'SAS only';
      group.label.title=unavailable?members.filter(body=>body.physics.status!=='ready').map(body=>`${body.method==='sas'?'PhysRL3D':'TRELLIS.2'}: ${body.physics.reason}`).join('\n'):'';
    }
  }
@@ -204,7 +208,7 @@ let reduced=motionPreference.matches;
          state.contour.geometry.dispose();state.contour.geometry=geometry;state.contour.position.z=state.data.epsilon*4;
        }
        descriptions.push(`${selected?'':entry.g.name+' · '}${entry.method==='sas'?'PhysRL3D':'TRELLIS.2'}: ${entry.displayOnly?Math.round(sliceFraction*100)+'% retained':height.heightMm.toFixed(1)+' / '+height.fullHeightMm.toFixed(1)+' mm'}`);
-       entry.label.title=`Mesh cut at ${height.heightMm.toFixed(2)} mm above this model's lowest point. Display geometry only; no printed interior is inferred.`;
+       entry.label.title=`Mesh cut at ${height.heightMm.toFixed(2)} mm above this model's lowest point. Display geometry only; no printed interior is inferred.${entry.geometryOnly?' '+ORIGINAL_PENGUIN_NOTE:''}`;
      }catch(error){
        releaseSlice(entry);descriptions.push(`${entry.method==='sas'?'PhysRL3D':'TRELLIS.2'}: cutaway unavailable`);console.warn('Mesh cutaway unavailable',entry.key,error);
      }
@@ -255,7 +259,7 @@ let reduced=motionPreference.matches;
  sliceRange.addEventListener('input',()=>setAction('slice',{autoplay:false,elapsed:(1-clamp(Number(sliceRange.value)/100,0,1))*8.999}));
  sliceUI.querySelector('[data-slice-full]').addEventListener('click',()=>setAction('slice',{autoplay:false}));
  sliceSweep.addEventListener('click',()=>{if(reduced||!ready)return;if(action!=='slice')setAction('slice',{manual:true});else{playing=!playing;explicitPlayback=playing;last=performance.now();updateUI();schedule();}});
- function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h||(w===renderWidth&&h===renderHeight))return;renderWidth=w;renderHeight=h;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const positions=displayPositions(groups.length,w,h,{single:oursOnly});groups.forEach((g,i)=>{[g.x,g.y]=positions[i];g.root.position.set(g.x,g.y,0);});}
+ function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h||(w===renderWidth&&h===renderHeight))return;renderWidth=w;renderHeight=h;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const positions=oursOnly?homepagePositions(groups.map(g=>g.id),w):displayPositions(groups.length,w,h);groups.forEach((g,i)=>{[g.x,g.y]=positions[i];g.root.position.set(g.x,g.y,0);});}
  const ro=new ResizeObserver(()=>{resize();fit(selected,!ready||reduced);schedule();});ro.observe(stage);ro.observe(host.querySelector('.spatial-controls'));
  const io=new IntersectionObserver(entries=>{inView=entries[0].isIntersecting;last=performance.now();schedule();},{rootMargin:'80px'});io.observe(stage);
  document.addEventListener('visibilitychange',()=>{last=performance.now();schedule();});
@@ -267,26 +271,27 @@ let reduced=motionPreference.matches;
  for(let i=0;i<examples.length;i++){
    const [id,name]=examples[i],x=(i%3-1)*330+(i>2?165:0),y=(Math.floor(i/3)-.5)*285;
    const root=new THREE.Group();root.position.set(x,y,0);scene.add(root);
-   const pad=new THREE.Mesh(new THREE.BoxGeometry(oursOnly?150:296,oursOnly?170:224,4),new THREE.MeshStandardMaterial({color:0xe6e4eb,roughness:.85}));pad.position.set(0,-2,-2.1);root.add(pad);
+   const paired=pairedExample(id,oursOnly);
+   const pad=new THREE.Mesh(new THREE.BoxGeometry(paired?296:150,paired?224:170,4),new THREE.MeshStandardMaterial({color:0xe6e4eb,roughness:.85}));pad.position.set(0,-2,-2.1);root.add(pad);
    const edge=new THREE.LineSegments(new THREE.EdgesGeometry(pad.geometry),new THREE.LineBasicMaterial({color:0xbcb4c7,transparent:true,opacity:.7}));edge.position.copy(pad.position);root.add(edge);
-   let divider=null;if(!oursOnly&&id!=='penguin'){divider=new THREE.Mesh(new THREE.BoxGeometry(.7,210,.15),new THREE.MeshBasicMaterial({color:0xd0c9d8}));divider.position.set(0,-2,.03);root.add(divider);}
-   const label=document.createElement('button');label.type='button';label.className='physics-pair-label';label.innerHTML=`<img src="${inputSource(id)}" alt=""><span><b>${name}</b><small>${oursOnly||id==='penguin'?'PhysRL3D · SAS':'TRELLIS.2 / PhysRL3D'}</small></span>`;label.setAttribute('aria-label',`Focus ${name}`);labels.append(label);label.addEventListener('click',()=>selectExample(id));
-   const button=document.createElement('button');button.type='button';button.setAttribute('aria-pressed','false');button.setAttribute('aria-label',`${oursOnly?'Inspect':'Compare'} ${name}`);button.innerHTML=`<img src="${inputSource(id)}" alt=""><span><b>${name}</b><small>${oursOnly||id==='penguin'?'SAS only':'Compare pair'}</small></span>`;picker.append(button);button.addEventListener('click',()=>selectExample(id));
+   let divider=null;if(paired){divider=new THREE.Mesh(new THREE.BoxGeometry(.7,210,.15),new THREE.MeshBasicMaterial({color:0xd0c9d8}));divider.position.set(0,-2,.03);root.add(divider);}
+   const label=document.createElement('button');label.type='button';label.className='physics-pair-label';label.innerHTML=`<img src="${inputSource(id)}" alt=""><span><b>${name}</b><small>${paired?'TRELLIS.2 / PhysRL3D':'PhysRL3D · SAS'}</small></span>`;label.setAttribute('aria-label',`Focus ${name}`);labels.append(label);label.addEventListener('click',()=>selectExample(id));
+   const button=document.createElement('button');button.type='button';button.setAttribute('aria-pressed','false');button.setAttribute('aria-label',`${oursOnly?'Inspect':'Compare'} ${name}`);button.innerHTML=`<img src="${inputSource(id)}" alt=""><span><b>${name}</b><small>${paired?'Compare pair':'SAS only'}</small></span>`;picker.append(button);button.addEventListener('click',()=>selectExample(id));
    groups.push({id,name,root,label,button,x,y,pad,edge,divider});
  }
  resize();fit(selected,true);schedule();
 
  async function addBody(g,method){
-   const key=`${g.id}-${method}`,displayOnly=DISPLAY_ONLY.has(g.id),meta=displayOnly?{chunks:[]}:await json(ROOT+key+'.json');
+   const key=`${g.id}-${method}`,displayOnly=DISPLAY_ONLY.has(g.id),geometryOnly=geometryOnlyModel(key),noBundle=displayOnly||geometryOnly,meta=noBundle?{chunks:[]}:await json(ROOT+key+'.json');
    // A missing or invalid trajectory must not discard this model or its supports.
-   const physicsRequest=physicsEnabled&&!displayOnly?json(STANDING_ROOT+key+'.json')
+   const physicsRequest=physicsEnabled&&!noBundle?json(STANDING_ROOT+key+'.json')
      .then(data=>validateStandingData(data,key))
      .catch(()=>({status:'unavailable',reason:'The rigid-body replay could not be loaded for this model.'})):
-     Promise.resolve({status:'unavailable',reason:displayOnly?'No validated standing replay is bound to this original display mesh.':'Rigid-body replay has not been enabled.'});
-   const bodyPath=displayOnly?`static/models/sas-20261118/${g.id}-${method==='sas'?'sas':'baseline'}.glb`:ROOT+key+'-body.glb';
+     Promise.resolve({status:'unavailable',reason:geometryOnly?`${ORIGINAL_PENGUIN_NOTE} No validated standing replay is bound to this mesh.`:displayOnly?'No validated standing replay is bound to this original display mesh.':'Rigid-body replay has not been enabled.'});
+   const bodyPath=geometryOnly?ORIGINAL_PENGUIN_ASSET:displayOnly?`static/models/sas-20261118/${g.id}-${method==='sas'?'sas':'baseline'}.glb`:ROOT+key+'-body.glb';
    const [glb,segmentsBuffer,idsBuffer,motionBuffer,physics]=await Promise.all([
-     loader.loadAsync(bodyPath),displayOnly?new ArrayBuffer(0):bin(ROOT+key+'-supports.bin'),displayOnly?new ArrayBuffer(0):bin(ROOT+key+'-chunk-ids.bin'),displayOnly?new ArrayBuffer(0):bin(ROOT+key+'-motion-quat.bin'),physicsRequest]);
-   const offset=new THREE.Group();offset.position.x=oursOnly||g.id==='penguin'?0:(method==='trellis2'?-64:64);g.root.add(offset);
+     loader.loadAsync(bodyPath),noBundle?new ArrayBuffer(0):bin(ROOT+key+'-supports.bin'),noBundle?new ArrayBuffer(0):bin(ROOT+key+'-chunk-ids.bin'),noBundle?new ArrayBuffer(0):bin(ROOT+key+'-motion-quat.bin'),physicsRequest]);
+   const offset=new THREE.Group();offset.position.x=pairedExample(g.id,oursOnly)?(method==='trellis2'?-64:64):0;g.root.add(offset);
    const body=new THREE.Group();offset.add(body);
    if(displayOnly){
      // Invert the exporter's Z-up→Y-up rotation. Keep source scale in mm;
@@ -337,19 +342,19 @@ let reduced=motionPreference.matches;
    const display=new THREE.Mesh(new THREE.BoxGeometry(24,4,.5),new THREE.MeshStandardMaterial({color:0x849ba6,roughness:.4}));display.position.set(0,-11.2,3.7);scale.add(display);
    const sweeper=new THREE.Mesh(new THREE.BoxGeometry(76,2,4),new THREE.MeshStandardMaterial({color:0xa798b4,roughness:.8}));offset.add(sweeper);sweeper.visible=false;
    const label=document.createElement('div');label.className=`physics-body-label method-${method}`;label.innerHTML=`<b>${method==='sas'?'PhysRL3D':'TRELLIS.2'}</b><small>${method==='sas'?'SAS · OURS':'BASE GENERATOR'}</small><span class="standing-body-readout"><span data-standing-tilt>Awaiting release</span><span data-standing-state>Rigid-body replay</span></span>`;labels.append(label);
-   label.dataset.supportEffect=illustrativeSupports?'illustrative-fragments':'sliced-fragments';label.dataset.supportChunks=String(chunks.length);label.dataset.modelKey=key;
+   label.dataset.geometryOnly=String(geometryOnly);label.dataset.supportEffect=geometryOnly?'unavailable':illustrativeSupports?'illustrative-fragments':'sliced-fragments';label.dataset.supportChunks=String(chunks.length);label.dataset.modelKey=key;
    if(physics.status==='ready'&&physics.timestepSensitive){
      const badge=document.createElement('span');badge.className='standing-sensitive-badge';badge.textContent='Numerically sensitive';
      badge.title=physics.caution||'The observed motion changes with the simulation timestep; this is not robust standing evidence.';
      Object.assign(badge.style,{display:'block',marginTop:'6px',padding:'4px 6px',border:'1px solid #c1a26d',borderRadius:'5px',background:'#51402de8',color:'#ffe2b3',fontSize:'.75rem',fontWeight:'600',lineHeight:'1.3',letterSpacing:'0'});
      label.dataset.timestepSensitive='true';label.append(badge);
    }
-   const weight=displayOnly?null:massSummary(weightData.models[key]);
+   const weight=noBundle?null:massSummary(weightData.models[key]);
    const measuredWeight=displayOnly?measuredPrintWeight(key):null;
-   const weightLabel=document.createElement('div');weightLabel.className='support-weight-label';weightLabel.dataset.massSource=measuredWeight?'physical-print':'slicer-estimate';weightLabel.dataset.modelKey=key;weightLabel.innerHTML='<b>— g</b><span>Awaiting supports</span><small></small>';weightLabel.querySelector('small').textContent=measuredWeight?'Measured · 100 mm print':'Slicer estimate';labels.append(weightLabel);
+   const weightLabel=document.createElement('div');weightLabel.className='support-weight-label';weightLabel.dataset.massSource=measuredWeight?'physical-print':weight?'slicer-estimate':'unavailable';weightLabel.dataset.modelKey=key;weightLabel.innerHTML='<b>— g</b><span>Awaiting supports</span><small></small>';weightLabel.querySelector('small').textContent=measuredWeight?'Measured · 100 mm print':weight?'Slicer estimate':'Weight unavailable';labels.append(weightLabel);
    const leader=document.createElement('div'),weightLeader=document.createElement('div');
    for(const line of [leader,weightLeader]){line.className='physics-label-leader';line.hidden=true;labels.prepend(line);}
-   const entry={key,g,method,offset,baseX:offset.position.x,body,chunks,motion,physics,label,meta,weight,measuredWeight,weightLabel,leader,weightLeader,scale,sweeper,displayOnly,illustrativeSupports,
+   const entry={key,g,method,offset,baseX:offset.position.x,body,chunks,motion,physics,label,meta,weight,measuredWeight,weightLabel,leader,weightLeader,scale,sweeper,displayOnly,geometryOnly,illustrativeSupports,
      tiltLabel:label.querySelector('[data-standing-tilt]'),stateLabel:label.querySelector('[data-standing-state]'),standingFrame:null};bodies.push(entry);
    applyBody(entry,0);return entry;
  }
@@ -394,7 +399,7 @@ let reduced=motionPreference.matches;
    entry.scale.visible=entry.chunks.length>0&&!released;
    entry.label.dataset.standingState=!standing?'unavailable':!released?'queued':standing.tiltDeg>10?'rotated':'within';
    entry.tiltLabel.textContent=!standing?'Test unavailable':!released?'Awaiting release':`Tilt ${standing.tiltDeg.toFixed(1)}°`;
-   entry.stateLabel.textContent=entry.illustrativeSupports?'Illustrative support removal · print photos verified':!standing?'Not simulated':!released?'10 s rigid-body replay':standing.state;
+   entry.stateLabel.textContent=entry.geometryOnly?'Original geometry · defects retained':entry.illustrativeSupports?'Illustrative support removal · print photos verified':!standing?'Not simulated':!released?'10 s rigid-body replay':standing.state;
    entry.label.title=!standing?entry.physics.reason:!released?'Starts after support collection.':
      `${standing.elapsed.toFixed(2)} / ${STANDING_DURATION.toFixed(2)} s; current tilt ${standing.tiltDeg.toFixed(2)}°; maximum tilt so far ${standing.maxTiltDeg.toFixed(2)}°. Orientation threshold only, not certified standing.`;
    // All examples share collection timing. The virtual tray is presentation
@@ -550,8 +555,8 @@ let reduced=motionPreference.matches;
    const labelSizes=new Map();
    if(selected)for(const e of bodies.filter(e=>e.g.id===selected))for(const label of [e.label,e.weightLabel])labelSizes.set(label,{w:label.offsetWidth||130,h:label.offsetHeight||42});
    function place(label,point,visible){p.copy(point).project(camera);label.hidden=!visible||p.z>1||p.z< -1||Math.abs(p.x)>1.2||Math.abs(p.y)>1.2;label.style.left=`${(p.x*.5+.5)*w}px`;label.style.top=`${(-p.y*.5+.5)*h}px`;}
-   for(const g of groups)place(g.label,new THREE.Vector3(g.x,g.y+(oursOnly?92:112),24),g.root.visible&&!selected);
-   for(const e of bodies){e.leader.hidden=e.weightLeader.hidden=true;const focused=e.g.id===selected;place(e.label,new THREE.Vector3(e.g.x+e.offset.position.x,e.g.y-(focused?130:41),focused?-5:10),e.offset.visible&&e.g.root.visible&&(!selected||focused));place(e.weightLabel,new THREE.Vector3(e.g.x+e.offset.position.x,e.g.y-(oursOnly?90:105),8),(!e.displayOnly||Boolean(e.measuredWeight))&&e.offset.visible&&e.g.root.visible&&sceneMode!=='slice'&&sceneMode!=='inspect'&&(focused||oursOnly&&!selected&&showcaseState?.phase==='weight')&&time<RELEASE);}
+   for(const g of groups)place(g.label,new THREE.Vector3(g.x,g.y+(pairedExample(g.id,oursOnly)?112:92),24),g.root.visible&&!selected);
+   for(const e of bodies){e.leader.hidden=e.weightLeader.hidden=true;const focused=e.g.id===selected;place(e.label,new THREE.Vector3(e.g.x+e.offset.position.x,e.g.y-(focused?130:41),focused?-5:10),e.offset.visible&&e.g.root.visible&&(!selected||focused));place(e.weightLabel,new THREE.Vector3(e.g.x+e.offset.position.x,e.g.y-(oursOnly?90:105),8),Boolean(e.weight||e.measuredWeight)&&e.offset.visible&&e.g.root.visible&&sceneMode!=='slice'&&sceneMode!=='inspect'&&(focused||oursOnly&&!selected&&showcaseState?.phase==='weight')&&time<RELEASE);}
    // Keep labels readable at oblique angles and extreme zoom. Short leader lines
    // preserve the connection to each original projected model or scale position.
    if(selected){
@@ -619,8 +624,8 @@ let reduced=motionPreference.matches;
 
  let count=0;
  for(const g of groups){
-   for(const method of oursOnly||g.id==='penguin'?['sas']:['trellis2','sas']){
-     loading.textContent=`Loading ${oursOnly?'PhysRL3D':'comparison'} models · ${count+1} / ${oursOnly?7:13}`;
+   for(const method of exampleMethods(g.id,oursOnly)){
+     loading.textContent=`Loading ${oursOnly?'homepage':'comparison'} models · ${count+1} / ${oursOnly?8:14}`;
      try{await addBody(g,method);count++;}catch(error){console.warn('Display model unavailable',g.id,method,error);g.label.title=g.button.title=`${method==='sas'?'PhysRL3D':'TRELLIS.2'} model unavailable; no substitute is shown.`;}
    }
  }
